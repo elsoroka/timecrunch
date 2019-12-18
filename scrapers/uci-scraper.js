@@ -21,7 +21,7 @@ result.then((json) => {
                     tmp_section = section["meetings"];
                     tmp_section["enrolled"] = section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"];
 
-                    sections.push(tmp_section);
+                    sections.push(...tmp_section);
                 });
 
                 let res = {
@@ -31,10 +31,10 @@ result.then((json) => {
                 };
                 courses.push(res);
             });
-            depts.push(courses);
+            depts.push({"deptCode": department["deptCode"],
+                        "courses": courses});
         });
-        let res = { "deptCode" : school["deptCode"],
-                    "schoolName" : school["schoolName"],
+        let res = { "schoolName" : school["schoolName"],
                     "depts": depts};
         schools.push(res);
         final_res = {schools};
