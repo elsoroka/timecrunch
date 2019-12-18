@@ -20,8 +20,9 @@ result.then((json) => {
                 course["sections"].forEach(section => {
                     tmp_section = section["meetings"];
                     tmp_section["enrolled"] = section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"];
-
-                    sections.push(...tmp_section);
+                    let res = {"enrolled" : section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"],
+                    "meetings" : section["meetings"]}
+                    sections.push(res);
                 });
 
                 let res = {
