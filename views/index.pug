@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #[em StudyPages], a basic website used to help organize my studying and graduation progress while completing my bachelors in Computer Science at UCI.
+
+  h1 Dynamic content
+
+  if error
+    p Error getting dynamic content.
+  else
+    p The course catalog has the following record counts:
+
+    ul
+      li #[strong Courses:] !{data.course_count}
+      li #[strong Classes:] !{data.class_count}
+      li #[strong Studies:] !{data.study_count}
+
+    p *course:= course in database I may or may not have taken
+    p *class:= class in database I have taken or am currently taking.

@@ -1,0 +1,23 @@
+extends layout
+block content
+  - var dept_list = ['ICS','MATH','IN4MTX'];
+  mixin select_dept 
+      label(for='dept_name') Department Name:
+      select#dept_name.form-control(name='dept_name' )
+        each dept in dept_list
+          option(value=dept) #{dept}
+
+  h1 Select Demographic(s):
+
+  form(method='POST' action='')
+    div.form-group
+      +select_dept
+      +select_dept
+      +select_dept
+      +select_dept
+    button.btn.btn-primary(type='submit') Submit
+
+  if errors
+    ul
+      for error in errors
+        li!= error.msg
