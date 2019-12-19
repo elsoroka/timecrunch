@@ -152,8 +152,18 @@ Main Components
   }
   .hm-schedule .timeline li {
     position: relative;
-    height: 50px;
   }
+  .hm-schedule .timeline table {
+    line-height: 15px;
+    width:100%;
+    text-align:center;
+  }
+    .hm-schedule .timeline .dayheader {
+    line-height: 50px;
+    text-align:center;
+    width:18%
+  }
+
   .hm-schedule .timeline li::after {
     /* this is used to create the table horizontal lines */
     content: '';
