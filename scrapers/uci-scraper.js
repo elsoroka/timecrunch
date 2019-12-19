@@ -1,37 +1,56 @@
 const WebSocAPI = require('websoc-api');
 const fs = require("fs");
-const path = require("path")
+const path = require("path");
+
+var finalJson = {
+            "lower" : {},
+            "upper": {},
+            "graduate": {}
+            };
 
 uciDepts = fs.readFileSync(path.resolve(__dirname, "uci-depts.txt"), "utf-8").split('\n');
 uciDepts.forEach((deptName, deptDelay) => {
     if (deptName != "") {
         ["LowerDiv", "UpperDiv", "Graduate"].forEach((division, divDelay) => {
             options = {
-                term:'2020 Winter',
+                term: '2020 Winter',
                 department: deptName,
                 division: division
             };
             setTimeout(cb(options), deptDelay*5000+ divDelay*1000);
         });
     }
-
 });
 
 function cb(options) {
     return () => callWebSoc(options).then(json => {
-        let data = JSON.stringify(json);
-        let div = options["division"].toLowerCase().replace("div", "");
-        let deptName = options["department"].replace("/", "_");
 
-        var fileName = options["term"] + " " + div + " ";
-        fileName = fileName.toLowerCase().replace(/ /g, "-");
-        fileName += deptName + ".json";
+        // console.log(json);
+        // let data = JSON.stringify(json);
+        // let div = options["division"].toLowerCase().replace("div", "");
+        // let deptName = options["department"].replace("/", "_");
+        // console.log(json);
+        // var fileName = options["term"] + " " + div + " ";
+        // fileName = fileName.toLowerCase().replace(/ /g, "-");
+        // fileName += deptName + ".json";
 
-        fs.writeFile(path.resolve(__dirname, '..', 'data', 'uci', fileName), data, err => {
+        let fileName = "final.json";
+        for (let [key, value] of Object.entries(json)) {
+            if (options["division"] === "LowerDiv") {
+                finalJson["lower"][key] = value;
+            } else if (options["division"] === "UpperDiv") {
+                finalJson["upper"][key] = value;
+            } else if (options["division"] === "Graduate") {
+                finalJson["graduate"][key] = value;
+            }
+        }
+
+        // console.log(JSON.stringify(finalJson));
+        fs.writeFile(path.resolve(__dirname, '..', 'data', 'uci', fileName), JSON.stringify(finalJson), err => {
             if (err)
-                console.log(fileName, "not ok");
+                console.log(options["division"], options["department"], "not ok");
             else
-                console.log(fileName, "ok")
+                console.log(options["division"], options["department"], "ok");
         });
     });
 }
@@ -39,12 +58,12 @@ function cb(options) {
 function callWebSoc(options) {
     return new Promise( resolve => {
         const result = WebSocAPI.callWebSocAPI(options);
-        finalJson = { "depts" : []};
+
         result.then((json) => {
             final_res = { };
-            schools = []
+            // schools = []
+            // depts = {};
             json["schools"].forEach(school => {
-                depts = [];
                 school["departments"].forEach(department => {
                     courses = [];
                     department["courses"].forEach(course => {
@@ -64,13 +83,19 @@ function callWebSoc(options) {
                         };
                         courses.push(res);
                     });
-                    depts.push({"deptCode": department["deptCode"],
-                                "courses": courses});
+                    if (final_res[department["deptCode"]]) {
+                        final_res[department["deptCode"]].push(...courses);
+                    } else {
+                        final_res[department["deptCode"]] = courses;
+                    }
+
+                    // depts.push({"deptCode": department["deptCode"],
+                    //             "courses": courses});
                 });
-                let res = { "schoolName" : school["schoolName"],
-                            "depts": depts};
-                schools.push(res);
-                final_res = {schools};
+
+                //let res = {: depts};
+                // schools.push(res);
+                //final_res = {schools};
             });
             //console.log(final_res["depts"]);
             //console.log(JSON.stringify(final_res));
