@@ -1,55 +1,41 @@
 const WebSocAPI = require('websoc-api');
 const fs = require("fs");
 const path = require("path")
+
 uciDepts = fs.readFileSync(path.resolve(__dirname, "uci-depts.txt"), "utf-8").split('\n');
 uciDepts.forEach((deptName, deptDelay) => {
     if (deptName != "") {
         ["LowerDiv", "UpperDiv", "Graduate"].forEach((division, divDelay) => {
             options = {
-                term:'2019 Winter',
+                term:'2020 Winter',
                 department: deptName,
                 division: division
             };
-            setTimeout(cb(options), deptDelay*10000+ divDelay*3000);
+            setTimeout(cb(options), deptDelay*5000+ divDelay*1000);
         });
     }
 
 });
+
 function cb(options) {
     return () => callWebSoc(options).then(json => {
         let data = JSON.stringify(json);
         let div = options["division"].toLowerCase().replace("div", "");
-        let deptName = options["department"].replace(" ", " ");
+        let deptName = options["department"].replace("/", "_");
 
         var fileName = options["term"] + " " + div + " ";
         fileName = fileName.toLowerCase().replace(/ /g, "-");
         fileName += deptName + ".json";
-        console.log(fileName);
-        fs.writeFileSync(path.resolve(__dirname, '..', 'data', 'uci', fileName), data);
+
+        fs.writeFile(path.resolve(__dirname, '..', 'data', 'uci', fileName), data, err => {
+            if (err)
+                console.log(fileName, "not ok");
+            else
+                console.log(fileName, "ok")
+        });
     });
 }
-// callWebSoc(options).then(json => {
-//     let data = JSON.stringify(json);
-//     let div = options["division"].toLowerCase().replace("div", "");
-//     var fileName = options["term"] + " " + div + ".json";
-//     fileName = fileName.toLowerCase().replace(/ /g, "-");
-//     console.log(fileName);
-//     // fs.writeFileSync(fileName, data);
-// });
-//
-// options = {
-//     term:'2019 Winter',
-//     department:'I&C SCI',
-//     division: 'Graduate'
-// };
-// callWebSoc(options).then(json => {
-//     let data = JSON.stringify(json);
-//     let div = options["division"].toLowerCase().replace("div", "");
-//     var fileName = options["term"] + " " + div + ".json";
-//     fileName = fileName.toLowerCase().replace(/ /g, "-");
-//     console.log(fileName);
-//     // fs.writeFileSync(fileName, data);
-// });
+
 function callWebSoc(options) {
     return new Promise( resolve => {
         const result = WebSocAPI.callWebSocAPI(options);
