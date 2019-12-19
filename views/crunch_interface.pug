@@ -2,8 +2,8 @@ extends layout
 block content
   - var dept_list = ['ICS','MATH','IN4MTX'];
   mixin select_dept 
-      label(for='dept_name') Department Name:
-      select#dept_name.form-control(name='dept_name' )
+      label(for='dept_names') Department Name:
+      select#dept_names.form-control(name='dept_names' )
         each dept in dept_list
           option(value=dept) #{dept}
 
