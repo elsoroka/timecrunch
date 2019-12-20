@@ -4,7 +4,7 @@ var router = express.Router();
 /* GET timecronch app  */
 
 router.get('/', function(req, res, next) {
-  res.render('crunch_interface', {title: 'timecrunch'})
+  res.render('layout', {title: 'timecrunch'})
   //res.send('timecromchh pepega: hello worldjk');
 });
 
@@ -17,7 +17,7 @@ router.post('/', function(req, res, next) {
 		// Do some THING
 		console.log(dept_name)
 	}
-	res.render('crunch_interface', {title: 'timecrunch'})
+	res.render('layout', {title: 'timecrunch'})
 })
 
 //  Display interface on GET.
