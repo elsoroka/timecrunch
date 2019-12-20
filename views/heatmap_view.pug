@@ -1,15 +1,14 @@
-mixin hour(name)
+mixin 10minutes(name, index)
+  // Construct a row. If data exists (not undefined), index into it and use the numbers there.
   tr
     td.hour= name
-    each val in [0, 0, 0, 0, 0]
-      td= val
-  tr
-    td
-    each val in [0, 0, 0, 0, 0]
-      td= val
-  tr
-    td
-    each val in [0, 0, 0, 0, 0]
+    // See if we have data passed in from layout
+    - console.log("Index:");
+    - console.log(index);
+    - if ((undefined == data) || (index >= data.length)) { row1 = [0,0,0,0,0]; }
+    - else { console.log(data[index]); row1 = data[index] }
+
+    each val in row1
       td= val
 
 br
@@ -25,15 +24,22 @@ p.heatmap-title  heatmap display
         th.dayheader Thursday
         th.dayheader Friday
       tr
+      - console.log(data);
       - var n = 0;
       - var hours = 8;
-      while n <= 13
-        +hour(hours + ':00')
-        +hour(hours + ':30')
-        - n++;
+
+      // 14 hours in 10-minute increments
+      while n < 14*6
+        if (n%2) 
+          +10minutes(hours + ':00', n++)
+          +10minutes('', n++)
+          +10minutes('', n++)
+        else
+          +10minutes(hours + ':30', n++)
+          +10minutes('', n++)
+          +10minutes('', n++)
         - hours = (hours)%12+1;
         
-
   // .timeline
 // .hm-schedule
 
