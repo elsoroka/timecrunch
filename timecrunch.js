@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var mongoose = require('mongoose');
 
 var indexRouter = require('./routes/index');
 var timecromch = require('./routes/timecromch');
@@ -22,8 +23,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//Database setup
-//END Database Setup
+// Database setup
+// Tell Mongoose to use global promise library
+mongoose.Promise = global.Promise 
+// Connect mongoose to mongoDB cloud atlas server
+var mongoDB = 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/test?retryWrites=true&w=majority';
+mongoose.connect(mongoDB)
+// Get handle to default connection
+var db = mongoose.connection 
+// Bind connection to error event to get notification of connection erros
+db.on('error', console.error.bind(console, 'Cloud MongoDB Atlas connection error:'));
+// END Database Setup
 
 app.use('/', indexRouter);
 app.use('/timecromch', timecromch);

@@ -5,7 +5,7 @@
  */
 
 var app = require('../timecrunch');
-var debug = require('debug')('studypages:server');
+var debug = require('debug')('timecrunch:server');
 var http = require('http');
 
 /**
