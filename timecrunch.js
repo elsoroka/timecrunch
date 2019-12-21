@@ -1,3 +1,4 @@
+// TODO: these are const
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -5,8 +6,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 
+// TODO: const
 var indexRouter = require('./routes/index');
-var timecromch = require('./routes/timecromch');
+var timecromchRouter = require('./routes/timecromch');
+var timecrunchInterfaceRouter = require('./routes/timecrunch_interface');
 
 var app = express();
 
@@ -36,7 +39,8 @@ db.on('error', console.error.bind(console, 'Cloud MongoDB Atlas connection error
 // END Database Setup
 
 app.use('/', indexRouter);
-app.use('/timecromch', timecromch);
+app.use('/timecromch', timecromchRouter); // working prototype
+app.use('/timecrunch', timecrunchInterfaceRouter); //aspiring finished interface
 
 // Error Catching
 // catch 404 and forward to error handler

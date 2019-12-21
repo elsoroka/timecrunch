@@ -1,7 +1,5 @@
 /* interface controller */
 // TODO: extend to handle multiple universities
-//var University = require('../models/university');
-//var Division = require('../models/division');
 var Course = require('../models/course')
 
 // none of these are used right now 
@@ -23,7 +21,7 @@ exports.exec_query = [
         if (!errors.isEmpty()) 
 		{
             // There are errors. Render the form again with sanitized values/error messages.
-            res.render('timecrunch_interface', { title: 'Search Demographics:' errors: errors.array() } );
+            res.render('timecrunch_interface', { title: 'Search Demographics:' } ); // TODO: errors: errors.array() } );
 			return;
         }
 		// No errors
@@ -68,11 +66,12 @@ exports.exec_query = [
 /* private */
 function generate_heatmap(courses)
 {
-    let hmap = new Array(5).fill(0).map({} => new Array(4).fill(0));
+
+	const heatmap = new Array(14*6).fill(0).map(() => new Array(5).fill(0));
     for (course in courses)
     {
         // TODO: use info to accumulate 2D histogram packaged in JSON so we can pass the object to pug 
         // accumulate_heatmap(course_doc, hmap);
     }
-    return hmap;
+    return heatmap;
 }
