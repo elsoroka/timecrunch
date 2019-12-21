@@ -1,133 +1,45 @@
+mixin 10minutes(name, index)
+  // Construct a row. If data exists (not undefined), index into it and use the numbers there.
+  tr
+    td.hour= name
+    // See if we have data passed in from layout
+    - console.log("Index:");
+    - console.log(index);
+    - if ((undefined == data) || (index >= data.length)) { row1 = [0,0,0,0,0]; }
+    - else { console.log(data[index]); row1 = data[index] }
+
+    each val in row1
+      td= val
+
 br
 p.heatmap-title  heatmap display 
 .hm-schedule.loading
   .timeline
-    ul
-      li
-        span 09:00
-      li
-        span 09:30
-      li
-        span 10:00
-      li
-        span 10:30
-      li
-        span 11:00
-      li
-        span 11:30
-      li
-        span 12:00
-      li
-        span 12:30
-      li
-        span 13:00
-      li
-        span 13:30
-      li
-        span 14:00
-      li
-        span 14:30
-      li
-        span 15:00
-      li
-        span 15:30
-      li
-        span 16:00
-      li
-        span 16:30
-      li
-        span 17:00
-      li
-        span 17:30
-      li
-        span 18:00
+    table
+      tr
+        th
+        th.dayheader Monday
+        th.dayheader Tuesday
+        th.dayheader Wednesday
+        th.dayheader Thursday
+        th.dayheader Friday
+      tr
+      - console.log(data);
+      - var n = 0;
+      - var hours = 8;
+
+      // 14 hours in 10-minute increments
+      while n < 14*6
+        if (n%2) 
+          +10minutes(hours + ':00', n++)
+          +10minutes('', n++)
+          +10minutes('', n++)
+        else
+          +10minutes(hours + ':30', n++)
+          +10minutes('', n++)
+          +10minutes('', n++)
+        - hours = (hours)%12+1;
+        
   // .timeline
-  .events
-    ul
-      li.events-group
-        .top-info
-          span Monday
-        ul
-          li.single-event(data-start='09:30' data-end='10:30' data-content='event-abs-circuit' data-event='event-1')
-            a(href='#0')
-              em.event-name Abs Circuit
-          li.single-event(data-start='11:00' data-end='12:30' data-content='event-rowing-workout' data-event='event-2')
-            a(href='#0')
-              em.event-name Rowing Workout
-          li.single-event(data-start='14:00' data-end='15:15' data-content='event-yoga-1' data-event='event-3')
-            a(href='#0')
-              em.event-name Yoga Level 1
-      li.events-group
-        .top-info
-          span Tuesday
-        ul
-          li.single-event(data-start='10:00' data-end='11:00' data-content='event-rowing-workout' data-event='event-2')
-            a(href='#0')
-              em.event-name Rowing Workout
-          li.single-event(data-start='11:30' data-end='13:00' data-content='event-restorative-yoga' data-event='event-4')
-            a(href='#0')
-              em.event-name Restorative Yoga
-          li.single-event(data-start='13:30' data-end='15:00' data-content='event-abs-circuit' data-event='event-1')
-            a(href='#0')
-              em.event-name Abs Circuit
-          li.single-event(data-start='15:45' data-end='16:45' data-content='event-yoga-1' data-event='event-3')
-            a(href='#0')
-              em.event-name Yoga Level 1
-      li.events-group
-        .top-info
-          span Wednesday
-        ul
-          li.single-event(data-start='09:00' data-end='10:15' data-content='event-restorative-yoga' data-event='event-4')
-            a(href='#0')
-              em.event-name Restorative Yoga
-          li.single-event(data-start='10:45' data-end='11:45' data-content='event-yoga-1' data-event='event-3')
-            a(href='#0')
-              em.event-name Yoga Level 1
-          li.single-event(data-start='12:00' data-end='13:45' data-content='event-rowing-workout' data-event='event-2')
-            a(href='#0')
-              em.event-name Rowing Workout
-          li.single-event(data-start='13:45' data-end='15:00' data-content='event-yoga-1' data-event='event-3')
-            a(href='#0')
-              em.event-name Yoga Level 1
-      li.events-group
-        .top-info
-          span Thursday
-        ul
-          li.single-event(data-start='09:30' data-end='10:30' data-content='event-abs-circuit' data-event='event-1')
-            a(href='#0')
-              em.event-name Abs Circuit
-          li.single-event(data-start='12:00' data-end='13:45' data-content='event-restorative-yoga' data-event='event-4')
-            a(href='#0')
-              em.event-name Restorative Yoga
-          li.single-event(data-start='15:30' data-end='16:30' data-content='event-abs-circuit' data-event='event-1')
-            a(href='#0')
-              em.event-name Abs Circuit
-          li.single-event(data-start='17:00' data-end='18:30' data-content='event-rowing-workout' data-event='event-2')
-            a(href='#0')
-              em.event-name Rowing Workout
-      li.events-group
-        .top-info
-          span Friday
-        ul
-          li.single-event(data-start='10:00' data-end='11:00' data-content='event-rowing-workout' data-event='event-2')
-            a(href='#0')
-              em.event-name Rowing Workout
-          li.single-event(data-start='12:30' data-end='14:00' data-content='event-abs-circuit' data-event='event-1')
-            a(href='#0')
-              em.event-name Abs Circuit
-          li.single-event(data-start='15:45' data-end='16:45' data-content='event-yoga-1' data-event='event-3')
-            a(href='#0')
-              em.event-name Yoga Level 1
-  .event-modal
-    header.header
-      .content
-        span.event-date
-        h3.event-name
-      .header-bg
-    .body
-      .event-info
-      .body-bg
-    a.close(href='#0') Close
-  .cover-layer
 // .hm-schedule
 
