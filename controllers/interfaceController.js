@@ -25,7 +25,7 @@ exports.exec_query = [
 			return;
         }
 		// No errors
-		let demographics = req.body; 
+		let demographics = req.body.dept_names;
         let departments = demographics; // assume demographics is an array of departments TODO: allow for specific divisions also
         // let divisions = division;
         let for_university = { university: "UCI" } // TODO: allow user to choose university

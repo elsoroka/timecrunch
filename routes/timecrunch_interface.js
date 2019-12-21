@@ -4,7 +4,8 @@ const interface_controller = require('../controllers/interfaceController'); // f
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	res.render('/timecrunch');
+	res.render('layout', {title: 'timecrunch', data:undefined});
+
 });
 
 router.post('/', interface_controller.exec_query);
