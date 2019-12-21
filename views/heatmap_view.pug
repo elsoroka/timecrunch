@@ -5,7 +5,8 @@ mixin 10minutes(name, index)
     // See if we have data passed in from layout
     - console.log("Index:");
     - console.log(index);
-    - if ((undefined == data) || (index >= data.length)) { row1 = [0,0,0,0,0]; }
+    - if ((undefined == data) || (index >= data.length)) 
+      -{ row1 = [0,0,0,0,0]; }
     - else { console.log(data[index]); row1 = data[index] }
 
     each val in row1
@@ -27,18 +28,21 @@ p.heatmap-title  heatmap display
       - console.log(data);
       - var n = 0;
       - var hours = 8;
-
+      - const noon = (4*2)*3; // 4hrs in 30min chunks  
+      - let ampm = undefined;
       // 14 hours in 10-minute increments
       while n < 14*6
-        if (n%2) 
-          +10minutes(hours + ':00', n++)
+        - ampm =  n < noon ? 'a' : 'p'
+        if (n % 2 == 0) 
+          +10minutes(hours + ':00' + ampm, n++)
           +10minutes('', n++)
           +10minutes('', n++)
         else
-          +10minutes(hours + ':30', n++)
+          +10minutes(hours + ':30' + ampm, n++)
           +10minutes('', n++)
           +10minutes('', n++)
-        - hours = (hours)%12+1;
+        if (n % 6 == 0)
+            - hours = (hours) % 12 + 1;
         
   // .timeline
 // .hm-schedule
