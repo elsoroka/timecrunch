@@ -5,8 +5,8 @@ const CourseSchema = new Schema(
 {
     _id: Schema.Types.ObjectId,
     university: String,
+    division: String,  
     department: String,
-    division: String, 
     // The names of the fields follow what WebSoc and websoc-api calls these
 	courseTitle: String,
 	courseNumber: String, // e.g. "20A"
