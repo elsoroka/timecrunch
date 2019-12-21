@@ -4,8 +4,8 @@ const interface_controller = require('../controllers/interfaceController'); // f
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	res.render('/timecromch');
+	res.render('/timecrunch');
 });
 
-router.post('/submit-form', interface_controller.exec_query);
+router.post('/', interface_controller.exec_query);
 module.exports = router;
