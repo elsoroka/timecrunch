@@ -8,8 +8,8 @@ const CourseSchema = new Schema(
     division: String,  
     department: String,
     // The names of the fields follow what WebSoc and websoc-api calls these
-	courseTitle: String,
 	courseNumber: String, // e.g. "20A"
+	courseTitle: String,
 	// array of secctions with nested array of meetings
 	sections: 
     [{
