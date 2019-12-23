@@ -10,25 +10,28 @@ class GenericHeatmap {
 	 */
 	constructor(timeStep,
 		        defaultTimeStart=8*60,
-		        defaultTimeStop=20*60,
+		        defaultTimeStop=22*60,
 		        defaultDays=5,
 		        timeFormat='12',
 		        ) {
 		// Data integrity checks
-		assert(Number.isInteger(timeStep) && timeStep > 0);
+		// timeStep must be a positive integer and divide evenly into 60 minutes (1 hour)
+		assert(timeStep > 0 && Number.isInteger(60/timeStep));
+		// defaultTimeStart and defaultTimeStop must be hour values (multiples of 60min)
+		assert(Number.isInteger(defaultTimeStart/60) && Number.isInteger(defaultTimeStop/60));
+		// time must start before it stops
 		assert(defaultTimeStart < defaultTimeStop);
-
 		// For UI testability reasons, restrict to 5 weekdays + 2 optional weekend days
 		assert(defaultDays >= 5 && defaultDays <= 7);
-		// 
+		// Are there other time formats? Rewrite when humanity reaches Mars.
 		assert(timeFormat == '12' || timeFormat == '24');
 
 		// Data integrity checks complete.
-		this.timeStep    = timeStep;
-		this.timeStart   = defaultTimeStart;
-		this.timeStop    = defaultTimeStop;
-		this.defaultDays = defaultDays;
-		this.timeFormat  = timeFormat;
+		this.timeStep   = timeStep;
+		this.timeStart  = defaultTimeStart;
+		this.timeStop   = defaultTimeStop;
+		this.days       = defaultDays;
+		this.timeFormat = timeFormat;
 		// Construct the array with the default start/stop/days
 		// If a class is found later which is outside this range,
 		// the array size will change.
@@ -57,11 +60,30 @@ class GenericHeatmap {
 
 	getRows(startMinutes, endMinutes)
 	{
-	    // ASSUMPTION: The table starts at 8am and goes by 10 minute increments
-	    // TBD: Something about earlier/later times here
-	    // Move startMinutes and endMinutes to start at 8am
+	    // If startMinutes is EARLIER than the first row, prepend row(s) to display it.
+	    if (startMinutes < this.timeStart) {
+	    	// Guarantee timeStart is a whole hour value
+	    	// Otherwise, it will be difficult to guarantee rows are labeled correctly.
+	    	const hoursToAdd = Math.ceil((this.timeStart - startMinutes)/60);
+	    	// Because we have guaranteed 60/this.timeStep is integer, this is safe.
+	    	const newRows = new Array(hoursToAdd*60/this.timeStep).fill(0).map( () => new Array(this.days).fill(0));
+	    	
+	    	this.heatmap.unshift(...newRows);
+	    	// Fix the starting time
+	    	this.timeStart -= newRows.length*this.timeStep;
+	    	// console.log("Added rows", newRows, "timeStart", this.timeStart);
+	    }
+	    // If endMinutes is LATER than the last row, append row(s) to display it.
+	    if (endMinutes > this.timeStop) {
+	    	const hoursToAdd = Math.ceil((endMinutes - this.timeStop)/60);
+	    	const newRows = new Array(hoursToAdd*60/this.timeStep).fill(0).map( () => new Array(this.days).fill(0));
+	    	this.heatmap.push(...newRows);
+	    	// Fix te ending time
+	    	this.timeStop += newRows.length*this.timeStep;
+	    	// console.log("Added rows", newRows, "timeEnd", this.timeStop);
+	    }
 	    
-	    /* Downsample from minutes to timeStep increments with conservative rounding.
+	    /* Downsample from minutes to timeStep increments with "greedy" rounding.
 	    This means if you have a startTime 12:09 it will map to 12:00
 	    an endTime 12:01 will map to 12:10
 	    and a time length from 12:09 to 1:01 will be 70 minutes (12:00 - 1:10).*/
@@ -73,6 +95,17 @@ class GenericHeatmap {
 	    //console.log("For start and end:", startMinutes, endMinutes);
 	    //console.log("Rows:", rows);
 	    return rows;
+	}
+
+	// Return a list of all the time indices
+	getTimeLabels() {
+
+	}
+
+	// Return a list of the days
+	getDayLabels() {
+		alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+		return alldays.slice(0,this.days);
 	}
 }
 
