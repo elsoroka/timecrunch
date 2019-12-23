@@ -11,7 +11,7 @@ const{ sanitizeBody } = require('express-validator/filter');
 
 // execute user query on POST (user-facing form submission)
 exports.exec_query = [
-    // TODO: Validate that at least one department (or other demographic category) was selected
+    // Validate that at least one department (or other demographic category) was selected
 	// example of validation of string length (not array length) :thonking: 
 	// body('department', 'Department name is required!').isLength({min: 1}).trim(),
 	// Process request after validation and sanitization.
@@ -25,7 +25,6 @@ exports.exec_query = [
 			return;
         }
 		// No errors
-        console.log("starting to crunch some data");
 		let demographics = req.body.dept_names;
         let departments = demographics; // assume demographics is an array of departments TODO: allow for specific divisions also
         // let divisions = division;
@@ -35,7 +34,6 @@ exports.exec_query = [
             find(for_university).
             where('department').in(departments);
             //where('divisions').in(divisions);
-
         course_query.exec( function(err, courses) {
 			if (err)
 				return next(err);
@@ -45,26 +43,26 @@ exports.exec_query = [
                 console.log(courses);
                 // FAKE DATA, REMOVE
                 courses = [
-                {"timeIsTBA":false,
-                 "startTime":8*60, // 8am
-                 "endTime"  :8*60+50, // 8:50a
-                 "days"     :[0,2,4], // M, W, F
-                 "enrolled" :100}, // 100 
-                {"timeIsTBA":true,
-                 "startTime":9*60, // 9am
-                 "endTime"  :9*60+50, // 9:50a
-                 "days"     :[0,2,4], // M, W, F
-                 "enrolled" :200},      // 200
-                {"timeIsTBA":false,
-                 "startTime":12*60+30, //  12:30p
-                 "endTime"  :13*60+50, // 1:50p
-                 "days"     :[1,3],     // Tu, Thu
-                 "enrolled" :250},      // 
-                 {"timeIsTBA":false,
-                 "startTime":13*60,     //1p
-                 "endTime"  :14*60+50,  //2:50p
-                 "days"     :[3],       //Th
-                 "enrolled" :50},       // 50
+                {"timeisTBA":false,
+                 "startTime":8*60,
+                 "endTime"  :8*60+50,
+                 "days"     :[0,2,4],
+                 "enrolled" :100},
+                {"timeisTBA":true,
+                 "startTime":9*60,
+                 "endTime"  :9*60+50,
+                 "days"     :[0,2,4],
+                 "enrolled" :200},
+                {"timeisTBA":false,
+                 "startTime":12*60+30,
+                 "endTime"  :13*60+50,
+                 "days"     :[1,3],
+                 "enrolled" :250},
+                 {"timeisTBA":false,
+                 "startTime":13*60,
+                 "endTime"  :14*60+50,
+                 "days"     :[3],
+                 "enrolled" :50},
                 ];
 
 				let heatmap_data  = generate_heatmap(courses); //2d array populated with the course info
