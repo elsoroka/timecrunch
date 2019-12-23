@@ -9,10 +9,10 @@ class GenericHeatmap {
 	 * The time increment represents one row in the heatmap.
 	 */
 	constructor(timeStep,
-		        defaultTimeStart=8*60,
-		        defaultTimeStop=22*60,
-		        defaultDays=5,
-		        timeFormat='12',
+		        defaultTimeStart = 8*60,
+		        defaultTimeStop  = 22*60,
+		        defaultDays      = 5,
+		        timeFormat       = '12',
 		        ) {
 		// Data integrity checks
 		// timeStep must be a positive integer and divide evenly into 60 minutes (1 hour)
@@ -46,7 +46,7 @@ class GenericHeatmap {
         	}
 
         	const rows = this.getRows(course.startTime, course.endTime);
-        	const cols = course.days;
+        	const cols = this.getCols(course.days);
         	console.log("Rows", rows, "Cols", cols);
         	for (const row of rows) {
         		console.log("row", row);
@@ -58,8 +58,7 @@ class GenericHeatmap {
 		}
 	}
 
-	getRows(startMinutes, endMinutes)
-	{
+	getRows(startMinutes, endMinutes) {
 	    // If startMinutes is EARLIER than the first row, prepend row(s) to display it.
 	    if (startMinutes < this.timeStart) {
 	    	// Guarantee timeStart is a whole hour value
@@ -91,20 +90,42 @@ class GenericHeatmap {
 	    const end    = Math.ceil((endMinutes-this.timeStart)/this.timeStep);
 	    const length = end-start;
 	    
-	    const rows = Array(length).fill().map((_, i) => i+start);
+	    const rows = Array(length).fill().map((_, i) => i+start );
 	    //console.log("For start and end:", startMinutes, endMinutes);
 	    //console.log("Rows:", rows);
 	    return rows;
 	}
 
+	getCols(days) {
+		// this.days = number of columns we have allocated
+		// If we have a day outside this.days we need to add column(s).
+		const extras = days.filter( (day, _) => (day >= this.days));
+		// Add if necessary
+		if (0 != extras.length) {
+			const newDays = new Array(extras.length).fill(0);
+			for (let row of this.heatmap) {
+				row.push(...newDays);
+			}
+			// Update this.days limit
+			this.days += extras.length;
+			console.log("Added!!", this.heatmap);
+		}
+		return days;
+	}
+
 	// Return a list of all the time indices
 	getTimeLabels() {
-
+		// this.timeStart and this.timeStop are guaranteed to be integer multiples of 60.
+		const startHour = this.timeStart/60;
+		// Hour and half-hour labels
+		let times = Array(2*(this.timeStop/60-startHour));
+		// This function generates labels of the form 8:00, 8:30, 9:00, 9:30...
+		times.fill().map( (_, i) => Math.floor(startHour+i/2) + (i%2 ? ':30' : ':00'));
 	}
 
 	// Return a list of the days
 	getDayLabels() {
-		alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+		const alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 		return alldays.slice(0,this.days);
 	}
 }
