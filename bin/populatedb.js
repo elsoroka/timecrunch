@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const Course = require('../models/course')
 
 const userArgs = process.argv.slice(2);
-console.log('This script populates some test books, authors, genres and bookinstances to your database. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0-mbdj7.mongodb.net/local_library?retryWrites=true');
+console.log('Read ./bin/university_data/<schoolname>.json to update database with course data. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0-mbdj7.mongodb.net/local_library?retryWrites=true');
 let universities = []
 let courses = []
 //console.log(userArgs);
@@ -48,7 +48,7 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
                 cb(err, null);
                 return;
             }
-            console.log('New Course: ' + course);
+            console.log('New or Update Course: ' + course);
             //courses.push(course);
             cb(null, course)
             return;
@@ -56,7 +56,7 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
     );
 }
 
-async function loadcourse(path, cb) {
+async function load_courses_all_universities(path, cb) {
     const dir = await fs.promises.opendir(path)
     for await (const dirent of dir) {
         console.log(dirent.name)
@@ -69,7 +69,7 @@ async function loadcourse(path, cb) {
                 let uni_json = JSON.parse(data);
                 let uni_name = dirent.name.substr(0, dirent.name.lastIndexOf('.')); // TODO: we should store the name in the file instead to cleanly handle special chars
                 let div, dept, cls, courseNumber, courseTitle, section
-                console.log(uni_name);
+                //console.log(uni_name);
                 for (div in uni_json) {
                     //console.log(div)
                     for (dept in uni_json[div]) {
@@ -79,8 +79,8 @@ async function loadcourse(path, cb) {
                             //console.log(cls)
                             courseNumber = cls.courseNumber
                             courseTitle = cls.courseTitle
+                            //console.log(courseTitle, courseNumber);
                             courseCreate(uni_name, div, dept, courseNumber, courseTitle, cls.sections, cb);
-                            console.log(courseTitle, courseNumber);
                         }
                     }
                 }
@@ -89,8 +89,8 @@ async function loadcourse(path, cb) {
     }
 }
 
-function readUniversityData(cb){
-    ls('./bin/university_data', cb).catch(console.error)
+function readUniversityData(path, cb){
+   load_courses_all_universities(path, cb).catch(console.error)
 }
 
 function finish(err, results) {
@@ -99,9 +99,9 @@ function finish(err, results) {
     else {
         console.log('CourseInstances: '+ results);
     }
-    //console.log(universities);
     // All done, disconnect from database
     mongoose.connection.close();
 }
 
+let path_to_university_json = './bin/university_data';
 readUniversityData(path_to_university_json, finish)
