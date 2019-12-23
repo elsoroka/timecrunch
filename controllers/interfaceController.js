@@ -28,43 +28,31 @@ exports.exec_query = [
 		// No errors
 		let demographics = req.body.dept_names;
         let departments = demographics; // assume demographics is an array of departments TODO: allow for specific divisions also
+        let union_of_conditions = []
+
+        /*
+         * Build OR'd Query
+         */
+        departments.forEach(dept_name => {
+            if (dept_name != '')
+                union_of_conditions.push({department: dept_name})
+        });
+        // TODO: add divisions, but also later want to handle conditions like lower Math + upper CS
+        // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
+        
         // let divisions = division;
-        let for_university = { university: "UCI" } // TODO: allow user to choose university
+        let for_university = { university: "uci" } // TODO: allow user to choose university
+
         // Build the query to get all courses 
-        let course_query = Course.
-            find(for_university).
-            where('department').in(departments);
-            //where('divisions').in(divisions);
+        let course_query = Course.find(for_university).or(union_of_conditions).orFail();//new Error("No courses found")); 
+        // Run the query, exec returns a Promise
         course_query.exec( function(err, courses) {
-			if (err)
-				return next(err);
+			if (err) return next(err); // TODO: catch and handle error: "No courses found" 
+
             if (courses)
             {
                 console.log("COURSES:");
                 console.log(courses);
-                // FAKE DATA, REMOVE
-                courses = [
-                {"timeisTBA":false,
-                 "startTime":8*60,
-                 "endTime"  :8*60+50,
-                 "days"     :[0,2,4],
-                 "enrolled" :100},
-                {"timeisTBA":true,
-                 "startTime":9*60,
-                 "endTime"  :9*60+50,
-                 "days"     :[0,2,4],
-                 "enrolled" :200},
-                {"timeisTBA":false,
-                 "startTime":12*60+30,
-                 "endTime"  :13*60+50,
-                 "days"     :[1,3],
-                 "enrolled" :250},
-                 {"timeisTBA":false,
-                 "startTime":13*60,
-                 "endTime"  :14*60+50,
-                 "days"     :[3],
-                 "enrolled" :50},
-                ];
                 hm = new GenericHeatmap(10); // timestep of 10 minutes
 				hm.fill(courses); //2d array populated with the course info
                 /*
@@ -83,6 +71,7 @@ exports.exec_query = [
                 // let heatmap_dict = heatmap_data //view_dict(heatmap_data);
 				// ELS: Not sure what this is so I temporarily added the old render call
                 // res.render('timecrunch_interface_with_heatmap_data', heatmap_dict);
+                console.log("interfaceController:: about to render heatmap");
 				res.render('layout', {title: 'timecrunch', data:hm.heatmap});
                 return;
             }
