@@ -35,7 +35,6 @@ exports.exec_query = [
             find(for_university).
             where('department').in(departments);
             //where('divisions').in(divisions);
-        //
         course_query.exec( function(err, courses) {
 			if (err)
 				return next(err);
@@ -45,22 +44,22 @@ exports.exec_query = [
                 console.log(courses);
                 // FAKE DATA, REMOVE
                 courses = [
-                {"timeIsTBA":false,
+                {"timeisTBA":false,
                  "startTime":8*60,
                  "endTime"  :8*60+50,
                  "days"     :[0,2,4],
                  "enrolled" :100},
-                {"timeIsTBA":true,
+                {"timeisTBA":true,
                  "startTime":9*60,
                  "endTime"  :9*60+50,
                  "days"     :[0,2,4],
                  "enrolled" :200},
-                {"timeIsTBA":false,
+                {"timeisTBA":false,
                  "startTime":12*60+30,
                  "endTime"  :13*60+50,
                  "days"     :[1,3],
                  "enrolled" :250},
-                 {"timeIsTBA":false,
+                 {"timeisTBA":false,
                  "startTime":13*60,
                  "endTime"  :14*60+50,
                  "days"     :[3],
