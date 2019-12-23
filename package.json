@@ -1,11 +1,13 @@
 {
   "name": "timecrunch",
-  "version": "1.0.0",
+  "version": "0.0.1",
+  "@comment private": "If you set private: true in your package.json, then npm will refuse to publish it.",
   "private": true,
   "scripts": {
     "start": "node ./bin/server.js",
     "devstart": "nodemon .bin/server.js"
   },
+  "@comment dependencies": "TODO: go through to see which can of these can be upgraded",
   "dependencies": {
     "async": "^2.6.3",
     "cookie-parser": "^1.4.4",
