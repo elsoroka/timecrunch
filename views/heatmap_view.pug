@@ -3,8 +3,6 @@ mixin 10minutes(name, index)
   tr
     td.hour= name
     // See if we have data passed in from layout
-    - console.log("Index:");
-    - console.log(index);
     - if ((undefined == data) || (index >= data.length)) 
       -{ row1 = [0,0,0,0,0]; }
     - else { console.log(data[index]); row1 = data[index] }
@@ -25,7 +23,6 @@ p.heatmap-title  heatmap display
         th.dayheader Thursday
         th.dayheader Friday
       tr
-      - console.log(data);
       - var n = 0;
       - var hours = 8;
       - const noon = (4*2)*3; // 4hrs in 30min chunks  
