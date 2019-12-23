@@ -27,20 +27,33 @@ const CourseSchema = new Schema(
 
 //' XX:XX- XX:XXp' to [startMins, endMins] starting from midnight
 function minutesSinceMidnight(unformatted_time) {
+
+	// input: "XX:XX" output: XX, XX as integers
     const parse_hr_min = (hr_min_str) => hr_min_str.split(':').map(t => parseInt(t,10));
     const calculate_mins_mod12 = (h, m) => (h % 12) * 60 + m;
-    const time_in_minutes = (s, ampm, tag) => {
-        const [hr,min] = parse_hr_min(s) // input: "XX:XX" output: XX, XX as integers
-        let mins_before_noon = 0
-        if (ampm == 'p') // if pm, the end hour always is after 12pm, but the start hour needs to checked explicitly
-            if (tag == "end" || tag == "start" && hr <= 8 )
-                mins_before_noon = 12*60; // greedy: we know this many mins are guaranteed
-        return mins_before_noon + calculate_mins_mod12(hr, min); // add the rest
-    };
     const [start,end] = unformatted_time.trim().split('-');
-    const ampm = end.includes('p') ? 'p' : 'a'; 
-    let startMins = time_in_minutes(start, ampm, "start");
-    let endMins = time_in_minutes(end, ampm, "end");
+	const [sh, sm] = parse_hr_min(start);
+	const [eh, em] =  parse_hr_min(end);
+	const noon = 720; // 12*6
+	let startMins, endMins
+    if(end.includes('p')){ // pm
+		// assume both pm 
+		endMins = noon + calculate_mins_mod12(eh, em);
+		startMins = noon + calculate_mins_mod12(sh, sm);
+		// fix assumption if breaks constraint
+		if (startMins >= endMins) 
+			startMins = calculate_mins_mod12(sh, sm);
+	}
+	else { // am
+		endMins = calculate_mins_mod12(eh, em);
+		startMins = calculate_mins_mod12(sh, sm);
+	}
+
+	// final validation
+	if (startMins >= endMins) {
+		console.log('Error parsing minutes: startMins >= endMins')
+		return []
+	}
     return [startMins, endMins]
 };
 
@@ -61,17 +74,17 @@ function convertDaysToIntArray(days_string) {
 }
 
 CourseSchema.statics.parseSections = function(sections) {
-    let parsed_sections = new Array(sections.length)
+    let parsed_sections = []
     let parsed_section, parsed_meeting
     // create parsed sections
     sections.forEach(section => {
         parsed_section = {}
-        console.log(section);
+        //console.log(section);
         parsed_section.enrolled = section.enrolled;
         parsed_section.meetings = [];
         section.meetings.forEach(meeting => {
             parsed_meeting = {}
-            console.log(meeting)
+            //console.log(meeting)
             parsed_meeting.bldg = meeting.bldg
             if (meeting.time == 'TBA' || meeting.days == '') {
                 parsed_meeting.timeIsTBA = true
@@ -80,7 +93,10 @@ CourseSchema.statics.parseSections = function(sections) {
                 parsed_meeting.days = [0]
             }
             else {
-                let [startMins, endMins] = minutesSinceMidnight(meeting.time)
+				let isValid = minutesSinceMidnight(meeting.time);
+				if (isValid.length == 0)
+					return null;
+                let [startMins, endMins] = isValid
                 parsed_meeting.startTime = startMins
                 parsed_meeting.endTime = endMins
                 parsed_meeting.days = convertDaysToIntArray(meeting.days)

@@ -1,11 +1,29 @@
 #! /usr/bin/env node
 const fs = require('fs')
 const async = require('async')
+const mongoose = require('mongoose');
 const Course = require('../models/course')
+
+const userArgs = process.argv.slice(2);
+console.log('This script populates some test books, authors, genres and bookinstances to your database. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0-mbdj7.mongodb.net/local_library?retryWrites=true');
 let universities = []
 let courses = []
-const userArgs = process.argv.slice(2);
-
+//console.log(userArgs);
+// Get arguments passed on command line
+if (userArgs.length > 0 && !userArgs[0].startsWith('mongodb')) {
+    console.log('ERROR: You need to specify a valid mongodb URL as the first argument');
+    return -1;
+}
+let mongoDB = userArgs.length > 1 ? userArgs[0] : 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/test?retryWrites=true&w=majority';
+// set these to stop deprecation warnings
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+mongoose.connect(mongoDB);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 function courseCreate(uni, div, dept, number, title, sections, cb) {
     let courseinfo = {
@@ -15,31 +33,37 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
         courseNumber: number,
         courseTitle: title, 
     };
+
     //console.log(sections);
     // create array of  parsed sections 
-    courseinfo.sections = Course.parseSections(sections);
-    let course = new Course(courseinfo);
-    console.log(course.sections[0].meetings);
-    course.save( function (err) {
-        if (err) {
-            cb(err, null);
+    const parsed_sections = Course.parseSections(sections);
+    if (parsed_sections == null) {
+        return;
+    }
+    // upsert is true which means it will find the course and update it or create a new course if not present
+    // option "new" set to true means it will return the updated version instead of the original
+    Course.findOneAndUpdate(courseinfo, {sections: parsed_sections}, {new: true, upsert: true}, 
+        function (err, course) {
+            if (err) {
+                cb(err, null);
+                return;
+            }
+            console.log('New Course: ' + course);
+            //courses.push(course);
+            cb(null, course)
             return;
         }
-        console.log('New Course: ' + course);
-        //courses.push(course);
-        cb(null, course)
-    });
+    );
 }
 
-
-async function ls(path, cb) {
+async function loadcourse(path, cb) {
     const dir = await fs.promises.opendir(path)
     for await (const dirent of dir) {
         console.log(dirent.name)
         fs.readFile(path + '/' + dirent.name, (err, data) => {
             if (err) {
                 cb(err, null);
-                console.log(err);
+                return
             }
             else {
                 let uni_json = JSON.parse(data);
@@ -56,14 +80,10 @@ async function ls(path, cb) {
                             courseNumber = cls.courseNumber
                             courseTitle = cls.courseTitle
                             courseCreate(uni_name, div, dept, courseNumber, courseTitle, cls.sections, cb);
+                            console.log(courseTitle, courseNumber);
                         }
                     }
                 }
-                //console.log(uni_json);
-                //console.log(uni_json.lower['STATS'][1]['sections'][0]); //enrolled / meetings[]
-                //courseCreate(uni_name, 
-                //universities.push(uni_json);
-                //cb(null, uni_json);
             }
         });
     }
@@ -73,39 +93,15 @@ function readUniversityData(cb){
     ls('./bin/university_data', cb).catch(console.error)
 }
 
-function profit(err, results) {
+function finish(err, results) {
     if (err) 
         console.log('FINAL ERR: '+err);
     else {
         console.log('CourseInstances: '+ results);
     }
     //console.log(universities);
-    console.log(1);
-}
-
-async.series([readUniversityData], profit);
-/*
-const fs = require('fs')
-const dir = fs.opendirSync('./scrapers/data/universities/') // uci.json , stanford.json , etc..
-var university_json = []
-let dirent
-while ((dirent = dir.readSync()) !== null) {
-    console.log(dirent.name)
-    //university_json.push(require(dirent.name));
-}
-dir.closeSync()
-async.series([
-    createBookInstances
-],
-// Optional callback
-function(err, results) {
-    if (err) {
-        console.log('FINAL ERR: '+err);
-    }
-    else {
-        console.log('CourseInstances: '+ courseInstances);
-    }
     // All done, disconnect from database
     mongoose.connection.close();
-});
-*/
+}
+
+readUniversityData(path_to_university_json, finish)
