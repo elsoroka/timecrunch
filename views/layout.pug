@@ -7,16 +7,37 @@ html(lang='en')
         link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
         script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js')
         script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
+        script(src='https://d3js.org/d3.v4.js')
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
 
     body
         div(id='schedule-form-container')
             div(id='schedule-container')
                 div(id='heatmap')
-                    include heatmap_view
             div(id='user-input-form-container')
                 div(class='container-fluid')
                     include input_form 
                 div(class='container-fluid')
                     block content
         div(id='footer')
+    - let date = new Date();
+    - let weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    - let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    - let dateString = weekdayNames[date.getDay()] + " " + date.getHours() + ":" + ("00" + date.getMinutes()).slice(-2) + ":" + ("00" + date.getSeconds()).slice(-2) + ":" + date.getMilliseconds() +  " " + date.getDate() + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
+
+    - console.log(`data = ${server_data}`);
+    - console.log(`data.init = ${server_data.init}`);
+    - if (server_data.init == "init")
+      - console.log("init..lol " + dateString); 
+    - //script(src='/scripts/heatmap_d3.js')
+    script
+        .
+            let server_data = !{JSON.stringify(server_data)};
+            let weekdayNames_cus = !{JSON.stringify(server_data.weekdayNames_cus)};
+            let timeIncrements = !{JSON.stringify(server_data.timeIncrements)};
+            let hm = !{JSON.stringify(server_data.heatmap)};
+            console.log("please.." + !{JSON.stringify(server_data.heatmap)});
+        include ../public/scripts/heatmap_d3.js
+

@@ -72,7 +72,15 @@ exports.exec_query = [
 				// ELS: Not sure what this is so I temporarily added the old render call
                 // res.render('timecrunch_interface_with_heatmap_data', heatmap_dict);
                 console.log("interfaceController:: about to render heatmap");
-				res.render('layout', {title: 'timecrunch', data:hm.heatmap});
+
+                  let data_object = {
+                        init: "false",
+                        weekdayNames_cus: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                        timeIncrements: hm.incrementLabels,
+                        heatmap: hm.heatmap 
+                    };
+
+				res.render('layout', {title: 'timecrunch', server_data: data_object});
                 return;
             }
 			res.render('timecrunch_interface_no_data', no_data);
