@@ -11,13 +11,14 @@ let render_final = function(req, res, next) {
     let max_time = 14*6; //14 hours in 10 minute increments
     let incrementLabels = []//new Array(max_time).fill('    ');
     let noon = 24; //  4*2*3 = 4 hours in 30 minute chunks
+    let mins = ':00'
 
-    for (let i = 0, hours = 8; i < max_time; i += 3) {
+    for (let i = 0, hours = 8; i < max_time; i += 6) {
         let ampm = i < noon ? 'a': 'p';
         if (i && i % 6 == 0)
             hours = (hours % 12) + 1;
 
-        mins = i % 2 == 0 ? ':00' : ':30';
+        //mins = i % 2 == 0 ? ':00' : ':30';
         incrementLabels.push(hours + mins + ampm);
     }
     

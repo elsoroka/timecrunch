@@ -55,12 +55,13 @@ class GenericHeatmap {
         let max_time = 14*6; //14 hours in 10 minute increments
         this.incrementLabels = [];//new Array(max_time).fill('    ');
         let noon = 24; //  4*2*3 = 4 hours in 30 minute chunks
-        for (let i = 0, hours = 8; i < max_time; i += 3) {
+        let mins = ':00';
+        for (let i = 0, hours = 8; i < max_time; i += 6) {
             let ampm = i < noon ? 'a': 'p';
             if (i && i % 6 == 0)
                 hours = (hours % 12) + 1;
 
-            let mins = i % 2 == 0 ? ':00' : ':30';
+            //let mins = i % 2 == 0 ? ':00' : ':30';
             this.incrementLabels.push(hours + mins + ampm)
         }
 	}

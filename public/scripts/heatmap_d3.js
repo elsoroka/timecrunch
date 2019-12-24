@@ -24,14 +24,14 @@ var dateString = weekdayNames[date.getDay()] + " "
     + date.getHours() + ":" + ("00" + date.getMinutes()).slice(-2) + ":" + ("00" + date.getSeconds()).slice(-2) + ":" + date.getMilliseconds() + " " 
     + date.getDate() + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
 
-console.log("Initializing..." + dateString); 
+//console.log(`[${getFormattedTimeStamp()}] Initializing heatmap...`); 
 
 
 // TODO: programmatically determine width and height 
 // set the dimensions and margins of the graph
 var margin = {top: 100, right: 25, bottom: 30, left: 70},
-  width = 950 - margin.left - margin.right,
-  height = 850 - margin.top - margin.bottom;
+  width = Math.max(Math.min(window.innerWidth, 950),500) - margin.left - margin.right,
+  height = Math.max(Math.min(window.innerWidth,850),500)  - margin.top - margin.bottom;
 
 
 console.log(JSON.stringify(hm));
@@ -57,10 +57,7 @@ var x = d3.scaleBand()
 console.log(JSON.stringify(timeIncrements));
 svg.append("g")
     .attr("id", "day-axis")
-    .style("font-size", 15)
-    .attr("transform", "translate(0," + 0 + ")")
     .classed("x axis", true)
-    .call(d3.axisTop(x).tickSize(0))
     //.select(".domain").remove()
 
 // Build Y scales and axis:
@@ -158,19 +155,20 @@ x = d3.scaleBand()
 
 svg.select("#day-axis")
     .style("font-size", 15)
-    .attr("transform", "translate(0," + 0 + ")")
+    .attr("transform", "translate(0," + -2 + ")")
     .call(d3.axisTop(x).tickSize(0))
     .select(".domain").remove()
 
 // Build Y scales and axis:
+//timeIncrements.push('10:00p');
 y = d3.scaleBand()
     .range([ 0, height ])
     .domain(timeIncrements)//Array.from({length:84}, (_,x)=>x+'8:00a'))//timeIncrements)//Array.from({length:84},(_,i)=>i))  //timeIncrements
-    .padding(0.01);
+    .padding(-1.11);
 
 svg.select("#time-axis")
     .style("font-size", 15)
-    .attr("transform", "translate(10," + -1 + ")")
+    .attr("transform", "translate(10," + -10 + ")")
     .call(
         d3.axisLeft(y)
         .tickSize(0)

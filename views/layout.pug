@@ -9,8 +9,6 @@ html(lang='en')
         script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
         script(src='https://d3js.org/d3.v4.js')
         link(rel='stylesheet', href='/stylesheets/style.css')
-        script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
-
     body
         div(id='schedule-form-container')
             div(id='schedule-container')
@@ -40,4 +38,6 @@ html(lang='en')
             let hm = !{JSON.stringify(server_data.heatmap)};
             console.log("please.." + !{JSON.stringify(server_data.heatmap)});
         include ../public/scripts/heatmap_d3.js
+
+    - //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
 
