@@ -1,7 +1,7 @@
 /* interface controller */
 // TODO: extend to handle multiple universities
 const Course = require('../models/course')
-const GenericHeatmap = require('./GenericHeatmap')
+const GenericHeatmap = require('./generic-heatmap')
 
 // none of these are used right now 
 var async = require('async');

@@ -15,7 +15,7 @@ html(lang='en')
                 div(id='heatmap')
             div(id='user-input-form-container')
                 div(class='container-fluid')
-                    include input_form 
+                    include input-form 
                 div(class='container-fluid')
                     block content
         div(id='footer')
@@ -29,7 +29,7 @@ html(lang='en')
     - console.log(`data.init = ${server_data.init}`);
     - if (server_data.init == "init")
       - console.log("init..lol " + dateString); 
-    - //script(src='/scripts/heatmap_d3.js')
+    - //script(src='/scripts/heatmap-d3.js')
     script
         .
             let server_data = !{JSON.stringify(server_data)};
@@ -37,7 +37,7 @@ html(lang='en')
             let timeIncrements = !{JSON.stringify(server_data.timeIncrements)};
             let hm = !{JSON.stringify(server_data.heatmap)};
             console.log("please.." + !{JSON.stringify(server_data.heatmap)});
-        include ../public/scripts/heatmap_d3.js
+        include ../public/scripts/heatmap-d3.js
 
     - //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
 

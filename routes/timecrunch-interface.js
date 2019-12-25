@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const interface_controller = require('../controllers/interfaceController'); // form submission script, other complex functions required by interface
+const interface_controller = require('../controllers/interface-controller'); // form submission script, other complex functions required by interface
 
 //TODO: move these render_X functions to controllers/
 let render_init = function(req, res, next) {
