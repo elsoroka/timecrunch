@@ -27,8 +27,8 @@ function run(options) {
 
 function process(result) {
     for (const key of Object.keys(result)) {        
-        result[key].map( function(course,_) {
-            course.sections = parseSections(course.sections);
+        result[key].map( function(course,i) {
+            result[key][i].sections = parseSections(course.sections);
         });
     }
     return result; // fix

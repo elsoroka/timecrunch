@@ -33,6 +33,7 @@ function runScraper(scraper) {
 function cb(scraper, options) {
     return () => callScraper(scraper, options).then(json => {
 
+        // Parsing happens here now.
         json = scraper.process(json);
 
         let fileName = "final.json";
@@ -41,11 +42,12 @@ function cb(scraper, options) {
             finalJson[level][key] = value;
         }
 
-        fs.writeFile(path.resolve(__dirname, '..', 'university_data', scraper.name(), fileName), JSON.stringify(finalJson), err => {
+        fs.writeFile(path.resolve(__dirname, '..', 'university-data', scraper.name(), fileName), JSON.stringify(finalJson), err => {
             if (err) {
                 console.log(err, finalJson);
                 console.log(options["division"], options["department"], "not ok");
             } else {
+                console.log(finalJson);
                 console.log(options["division"], options["department"], "ok");
             }
         });
