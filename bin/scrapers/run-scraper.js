@@ -33,6 +33,7 @@ function runScraper(scraper) {
 function cb(scraper, options) {
     return () => callScraper(scraper, options).then(json => {
 
+        // Parsing happens here now.
         json = scraper.process(json);
 
         let fileName = "final.json";
@@ -46,6 +47,7 @@ function cb(scraper, options) {
                 console.log(err, finalJson);
                 console.log(options["division"], options["department"], "not ok");
             } else {
+                console.log(finalJson);
                 console.log(options["division"], options["department"], "ok");
             }
         });
