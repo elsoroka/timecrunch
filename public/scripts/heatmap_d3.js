@@ -28,9 +28,10 @@ console.log(timeIncrements);
 // TODO: programmatically determine width and height 
 // set the dimensions and margins of the graph
 const margin = {top: 100, right: 25, bottom: 30, left: 70}
-let width = Math.max(Math.min(window.innerWidth, 950),500) - margin.left - margin.right;
-let height = Math.max(Math.min(window.innerWidth,850),500)  - margin.top - margin.bottom;
+let width = Math.max(Math.min(document.getElementById('schedule-container').offsetWidth, 950),500) - margin.left - margin.right;
+let height = Math.max(Math.min(window.innerHeight,850),500)  - margin.top - margin.bottom;
 
+window.onresize = function(){ location.reload(); }
 
 /*
  * Heatmap Dimensions and Placement
@@ -48,7 +49,6 @@ let svg = d3.select("#heatmap")
 /*
  * Title
 */
-
 // Add title to graph
 svg.append("text")
     .attr("x", 0)
@@ -120,7 +120,7 @@ svg.append("g")
 svg.append("g")
     .attr("id", "time-axis")
     .style("font-size", 15)
-    .attr("transform", "translate(0," + -25 + ")")
+    .attr("transform", "translate(0," + -24 + ")")
     .classed("y axis", true)
 
 /*
@@ -142,10 +142,10 @@ let y = d3.scaleBand()
  */
 // Build color scale
 let myColor = d3.scaleLinear()
-    //.interpolator(d3.interpolateInferno)
+    //scaleSequential().interpolator(d3.interpolateInferno)
     .domain([0, Math.max(...[].concat(...hm))/2])
+            //d3.max(hm, function(d) {return d.count; })/2, d3.max(hm, function(d) {return d.count;})])
     .range(["#FFFFDD", "#3E9583", "#1F2D86"]);
-        //d3.max(hm, function(d) {return d.count; })/2, d3.max(hm, function(d) {return d.count;})])
 
 // add the squares
 let allArr = svg.selectAll()
