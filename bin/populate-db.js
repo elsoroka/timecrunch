@@ -103,5 +103,5 @@ function finish(err, results) {
     mongoose.connection.close();
 }
 
-let path_to_university_json = './bin/university_data';
+let path_to_university_json = './bin/university-data';
 readUniversityData(path_to_university_json, finish)

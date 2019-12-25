@@ -9,7 +9,7 @@ var mongoose = require('mongoose');
 // TODO: const
 var indexRouter = require('./routes/index');
 var timecromchRouter = require('./routes/timecromch');
-var timecrunchInterfaceRouter = require('./routes/timecrunch_interface');
+var timecrunchInterfaceRouter = require('./routes/timecrunch-interface');
 
 var app = express();
 
