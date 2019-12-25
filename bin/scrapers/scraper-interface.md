@@ -15,28 +15,34 @@ shall return a list of courses with the following parameters:
 ```
 [{
 	department  : String, // e.g. "ENGR"
-	courseNumber: String, // e.g. "20A"
+	courseCode  : String, // e.g. "20A"
 	courseTitle : String,
-	section     : String, // e.g. "32270"
-    enrolled    : Number, // students enrolled under this listing
-    bldg        : String,
-    timeIsTBA   : Boolean, // If true, class has no scheduled time
-    // when timeIsTBA is true, startTime, endTime, and days are ignored.
-    startTime   : Number,  // Minutes since 12am
-    endTime     : Number,  // Minutes since 12am, strictly > startTime
-    days        : [Number] // Days this class occurs, starting at Monday=0
-    // so if the class is MWF, use [0,2,4] and TuTh, use [1,3]
- }]
+	sections    : [{
+		meetings   : [{
+			bldg      : String,
+			enrolled  : Number, // students enrolled under this listing
+			timeIsTBA : Boolean, // If true, class has no scheduled time
+		    startTime : Number,  // Minutes since 12am
+    		endTime   : Number,  // Minutes since 12am, strictly > startTime
+    		days      : [Number] // Days this class occurs, starting at Monday=0
+		}]
+    }]
  ```
 
 #### Cross-Listings
 If a class is cross-listed, `enrolled` shall be the number of students enrolled under `department`, not the total for all cross-listed departments.
 
-#### Multiple Sections
-Multiple sections of "the same" class shall be listed separately.
+#### Classes, Sections and Meetings
+A Class has a single `courseCode` and shall contain at least one Section. For example, MATH 3D is one class.
 
-#### Classes With No Meeting Time
-Classes with no meeting time, for example online classes and course codes pertaining to independent study, internship, or research, may be reported with `timeIsTba = true`.
+A Section shall contain at least one Meeting. If there are two professors teaching MATH 3D lecture at two different times/days, in two different classrooms, there are two Sections of MATH 3D.
+
+A Meeting is a calendar event. A Meeting has a single start and end time, which can occur on multiple days.
+If one Section of Math 3D has lecture MWF at 9AM and discussion TuTh at 10AM, that is two Sections.
+If one Section of MAE 30 has lecture TuTh at 9:30AM and two possible discussion sections on Wednesday at 1PM and Friday at 2PM, that is 3 Meetings.
+
+#### TBA and No Meeting Time
+Sections with no meeting time, for example online sections and course codes pertaining to independent study, internship, or research, shall be reported with `timeIsTba = true`.
 
 #### Missing Enrollment Count
 If the `enrolled` parameter is not available, the scraper shall report `enrolled=0`.
