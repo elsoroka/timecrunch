@@ -31,7 +31,9 @@ function runScraper(scraper) {
 }
 
 function cb(scraper, options) {
-    return () => callWebSoc(scraper, options).then(json => {
+    return () => callScraper(scraper, options).then(json => {
+
+        json = scraper.process(json);
 
         let fileName = "final.json";
         for (let [key, value] of Object.entries(json)) {
@@ -50,7 +52,7 @@ function cb(scraper, options) {
     });
 }
 
-function callWebSoc(scraper, options) {
+function callScraper(scraper, options) {
     return new Promise( resolve => {
         const result = scraper.run(options);
 
