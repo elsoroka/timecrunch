@@ -1,5 +1,4 @@
 // UCI scraper class
-// Code moved from files
 
 const WebSocApi = require('websoc-api');
 const fs = require("fs");
@@ -82,6 +81,7 @@ function convertDaysToIntArray(days_string) {
     return dayInts
 }
 
+// Called by process()
 function parseSections(sections) {
     let parsed_sections = []
     let parsed_section, parsed_meeting
@@ -99,7 +99,7 @@ function parseSections(sections) {
                 parsed_meeting.timeIsTBA = true
                 parsed_meeting.startTime = 0
                 parsed_meeting.endTime = 0
-                parsed_meeting.days = [0]
+                parsed_meeting.days = []
             }
             else {
                 let isValid = minutesSinceMidnight(meeting.time);
