@@ -55,6 +55,7 @@ const executeQuery = (req, res, next) => {
     console.log(toType(req.body.departments));
     console.log(req.body.departments);
     let departments = req.body.departments.split(',');//JSON.parse('[' + req.body.departments + ']');
+    let divisions = req.body.divisions.split(',');
     console.log(departments);
     if (Array.isArray(req.body.departments)) console.log(`isarray`);
     if (Array.isArray(departments)) console.log(`isarray=${departments}`);
@@ -71,6 +72,11 @@ const executeQuery = (req, res, next) => {
         if (dept_name != '')
             union_of_conditions.push({department: dept_name})
     });
+    divisions.forEach(div_name => {
+        if (div_name != '')
+            union_of_conditions.push({department: div_name})
+    });
+
 
     // TODO: add divisions, but also later want to handle conditions like lower Math + upper CS
     // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
@@ -131,7 +137,8 @@ exports.setSchool =
                     return next(err);
                 }
                 console.log(university.departments);
-                res.json({departments: university.departments});
+                console.log(university.divisions);
+                res.json({departments: university.departments, divisions: university.divisions});
                 return;
             });
         }

@@ -3,8 +3,8 @@ $( function() {
 
     console.log(`hello from jquery`);
 
-
-    let deptList = ['--Select Department--'] //, 'AC ENG', 'ARABIC', 'MATH','IN4MATX'];
+    let deptList = ['--Select Department--'];
+    let divisionList = ['--Select Division--'];
     let selectedUniversityName = undefined;
 
     /*
@@ -12,30 +12,39 @@ $( function() {
      * This is somewhat like a client-side javascript version of 
      * the select_dept pug mixin in the old input-form.pug
      */
-    let makeDepartmentDropDown = (dl) => {
+    function makeDemographicDropDown(demList, labelSettings, dropDownSettings) {
         let label = document.createElement("LABEL");
         let dropDown = document.createElement("SELECT");
         let breakElement = document.createElement("BR");
-        label.setAttribute("for", "dept_names");
-        label.innerHTML = "Department:";
-        dropDown.setAttribute("class", "department-selection form-control");
-        //dropDown.setAttribute("class", "form-control");
-        dropDown.setAttribute("id", "dept_names");
-        dropDown.setAttribute("name", "dept_names");
-        dl.forEach( dept => {
+        label.setAttribute("for", labelSettings.forAttr);
+        label.innerHTML = labelSettings.innerHTML;
+        dropDown.setAttribute("class", dropDownSettings.classAttr);
+        dropDown.setAttribute("id", dropDownSettings.idAttr);
+        dropDown.setAttribute("name", dropDownSettings.nameAttr);
+        demList.forEach(dem => {
             let option = document.createElement("option");
-            option.text = dept;
+            option.text = dem;
             dropDown.add(option);
         });
         dropDown.selectedIndex = "0";
         return [label, dropDown, breakElement];
-    };
+
+    }
+
+    function makeDemographicObject(selectorStr, demList, forStr, innerHtmlString, classStr, idStr, nameStr){
+        return {
+            dropDowns: $(selectorStr),
+            demographicList: demList,
+            labelSettings: {forAttribute: forStr, innerHTML: innerHtmlString },
+            dropDownSettings: {classAttr: classStr, idAttr: idStr, nameAttr: nameStr}
+        }
+    }
 
     ///////////////////////
     /* School Selection */
     //////////////////////
+    // Initialize school selection to placeholder
     $("#school-drop-down").attr( "selectedIndex", 0 );
-
     /*
      * School Select Event Listener
      * When the user selects a school from the drop down box
@@ -52,17 +61,32 @@ $( function() {
             if (selectedUniversityName === undefined || selectedUniversityName !== tempSchoolSelection) {
                 // new school choice
                 selectedUniversityName = tempSchoolSelection; // remember this school choice
-                // clear any previous input boxes and add a new one
-                let departmentSelectionBoxes = $("#departments-group"); // TODO: send the name of this group from pug programmatically
-                departmentSelectionBoxes.empty();
                 $.get("/timecrunch/setSchool", {university_name: selectedUniversityName}, function(res) {
+                    let deptsNameLabel = "dept_names", divsNameLabel = "division_names";
+                    let demographics = [];//new Array(2)
+
                     // load university's departments as list
                     deptList = new Set([...deptList, ...res.departments]) // remember these corresponding school departments
-                    console.log(res.departments);
-                    console.log(deptList);
-                    // add a drop-down box for the user to select a department
-                    let labeledDepartmentSelect = makeDepartmentDropDown(deptList);
-                    departmentSelectionBoxes.append(labeledDepartmentSelect);
+                    divisionList = new Set([...divisionList, ...res.divisions]) // remember these corresponding school departments
+
+                    // TODO: send the id of the group (first argument below) from pug programmatically 
+                    // alls of these settings accept the lists actually seem like they should be defined as instances 
+                    // of a Demographic Class in the server and passed here
+                    demographics.push(makeDemographicObject("#departments-group", deptList,
+                                                            deptsNameLabel ,"Department:",
+                                                            "department-selection form-control", deptsNameLabel, deptsNameLabel));
+                    demographics.push(makeDemographicObject("#divisions-group", divisionList,
+                                                            divsNameLabel ,"Division:",
+                                                            "division-selection form-control", divsNameLabel, divsNameLabel));
+
+                    demographics.forEach(dem => {
+                        // clear any previous input boxes and start fresh
+                        dem.dropDowns.empty();
+                        console.log(dem.demographicList);
+                        // add a drop-down box for the user to select a department
+                        let labeledDemographicSelect = makeDemographicDropDown(dem.demographicList, dem.labelSettings, dem.dropDownSettings);
+                        dem.dropDowns.append(labeledDemographicSelect);
+                    });
                 });
             }
         }
@@ -80,27 +104,42 @@ $( function() {
         return selectedUniversityName;
     }
 
+
+    // warning: not using this right now using the more general version below 
+    // but TODO: allow for things like lower MATH + upper ARABIC  etc.
     function getSelectedDepartments() {
         let depts = new Set();
         $.each($(".department-selection option:selected"), function(){
+            if ($(this).val() === deptList[0]) // Don't add the placeholder
+                return;
             depts.add($(this).val());
         });
         return Array.from(depts);
     }
 
-    function getSelectedDivisions() {
+    function getSelectedDemographic(selectorStr, placeholder) {
+        let depts = new Set();
+        $.each($(selectorStr), function(){
+            if ($(this).val() === placeholder) // Don't add the placeholder
+                return;
+            depts.add($(this).val());
+        });
+        return Array.from(depts);
     }
 
     function getDemographics() {
         let demographics = new FormData();
         university = getSelectedUniversity();
-        departments = getSelectedDepartments();
+        departments = getSelectedDemographic(".department-selection option:selected", deptList[0]);
+        divisions = getSelectedDemographic(".division-selection option:selected", divisionList[0]);
         console.log(university);
         console.log(departments);
+        console.log(divisions);
         // TODO: add divisions
         //divisions = getSelectedDivisions();
         demographics.append('university', university);
         demographics.append('departments', departments);
+        demographics.append('divisions', divisions);
         //demographics.append('divisions', divisions);
         return new URLSearchParams(demographics); // express body-parser doesn't 
         // accept FormData so send back as url encoded query params

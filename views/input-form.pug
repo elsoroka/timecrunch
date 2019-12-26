@@ -15,7 +15,11 @@ br
 
 div#demographics-div
     form(id='demographics-form' method='POST' action='')
+      div#demographics-group.drop-down-selectors
       div#departments-group.drop-down-dept-selectors
+      div#divisions-group.drop-down-division-selectors
+      br
+      button.btn.btn-primary(type='submit') Submit
 
 if errors
   ul
