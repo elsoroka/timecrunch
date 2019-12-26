@@ -11,12 +11,11 @@ label(for='University') University:
 select#school-drop-down.form-control(name='school-select')
   for school in school_list
     option(value=school) #{school}
+br
 
 div#demographics-div
     form(id='demographics-form' method='POST' action='')
       div#departments-group.drop-down-dept-selectors
-      br
-      button.btn.btn-primary(type='submit') Submit
 
 if errors
   ul

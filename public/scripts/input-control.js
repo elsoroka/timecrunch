@@ -44,21 +44,27 @@ $( function() {
         console.log(`hello from school select event listener`);
         console.log($(this));
         console.log($(this)[0].selectedIndex);
+        // no selection == -1, placeholder text == 0
         if ($(this).prop("selectedIndex") > 0) {
-            // A valid index is required to set this global variable which
-            // other functions care about
-            selectedUniversityName = $(this).val();
+            // user selected school 
+            let tempSchoolSelection = $(this).val();
 
-            $.get("/timecrunch/setSchool", {university_name: selectedUniversityName}, function(res) {
-                // load university's departments as list
-                console.log(res.departments);
-                deptList = new Set([...deptList, ...res.departments])
-                console.log(deptList);
-                // add a drop-down box for the user to select a department
-                let labeledDepartmentSelect = makeDepartmentDropDown(deptList);
-                // TODO: send the name of this group from pug programmatically
-                $("#departments-group").append(labeledDepartmentSelect);
-            });
+            if (selectedUniversityName === undefined || selectedUniversityName !== tempSchoolSelection) {
+                // new school choice
+                selectedUniversityName = tempSchoolSelection; // remember this school choice
+                // clear any previous input boxes and add a new one
+                let departmentSelectionBoxes = $("#departments-group"); // TODO: send the name of this group from pug programmatically
+                departmentSelectionBoxes.empty();
+                $.get("/timecrunch/setSchool", {university_name: selectedUniversityName}, function(res) {
+                    // load university's departments as list
+                    deptList = new Set([...deptList, ...res.departments]) // remember these corresponding school departments
+                    console.log(res.departments);
+                    console.log(deptList);
+                    // add a drop-down box for the user to select a department
+                    let labeledDepartmentSelect = makeDepartmentDropDown(deptList);
+                    departmentSelectionBoxes.append(labeledDepartmentSelect);
+                });
+            }
         }
         $("#school-drop-down").blur();
     });

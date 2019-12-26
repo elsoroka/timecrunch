@@ -23,10 +23,13 @@ const getEmptyHeatmap = (req, res, next) => {
 // i.e. a typical scenario of a user landing on the site.
 const renderFinal = (req, res) => {
     console.log(res.locals.heatmap_object);
-    console.log("called res.render lol");
+    console.log("called res.render");
 	res.render('layout', {title: 'timecrunch', server_data: res.locals.heatmap_object });
 };
 
+// The final stage of the route process of a POST request that wants to redraw the heatmap,
+// i.e. a typical scenario of a user interacting with the input form 
+// or the initial arrival to an empty heatmap
 const sendHeatmapJson = (req, res) => {
     console.log(res.locals.heatmap_object);
     console.log("set heatmapJson via res.json");
@@ -49,8 +52,10 @@ const executeQuery = (req, res, next) => {
     console.log(`executyQuery:37:req.body=${req.body}`);
     console.log(`executyQuery:38:req.body.university=${req.body.university}`)
     console.log(`executyQuery:39:req.body.departments=${req.body.departments}`)
-    console.log(toType(req.body.departments)) 
-    let departments = req.body.departments.split();//JSON.parse('[' + req.body.departments + ']');
+    console.log(toType(req.body.departments));
+    console.log(req.body.departments);
+    let departments = req.body.departments.split(',');//JSON.parse('[' + req.body.departments + ']');
+    console.log(departments);
     if (Array.isArray(req.body.departments)) console.log(`isarray`);
     if (Array.isArray(departments)) console.log(`isarray=${departments}`);
     // end debug
@@ -108,8 +113,12 @@ const executeQuery = (req, res, next) => {
  * (i.e. connected via next() call)
  * and ending with renderFinal, which renders the layout.pug file
  */
+
+// allows the user to set the school and populate the available demographics, 
+// e.g. the departments and divisions
 exports.setSchool = 
-//[
+[
+    //TODO: send the divisions
     (req, res) => {
         if (req.query && req.query.university_name)
         {
@@ -124,20 +133,27 @@ exports.setSchool =
                 console.log(university.departments);
                 res.json({departments: university.departments});
                 return;
-                //res.send(university.departments);
-                console.log(`setschool::returning after res.send(university.departments)`);
-                return;
             });
         }
-        //res.send('[]');
     }
-//];
+];
+
+exports.initializePage = [
+    getEmptyHeatmap,
+    renderFinal
+    /*
+    (req, res) => {
+        res.render('layout', {title: 'timecrunch', server_data: {init: "init"}});
+            //, server_data: res.locals.heatmap_object });
+    }
+    */
+];
 
 // Initiallly empty heatmap
 exports.renderEmptyHeatmap =
 [
     getEmptyHeatmap,
-    renderFinal
+    sendHeatmapJson
 ];
 
 // execute user query on POST (user-facing form submission)

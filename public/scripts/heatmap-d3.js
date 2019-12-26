@@ -16,15 +16,28 @@ let getFormattedTimeStamp = (timestamp) =>
     + timestamp.getFullYear();
 //console.log(`[${getFormattedTimeStamp()}] Initializing heatmap...`); 
 console.log(`[${getFormattedTimeStamp(new Date)}] Initializing heatmap...`);
+
+/* removing
 console.log(JSON.stringify(hm));
 console.log(weekdayNames);
 console.log(timeIncrements);
+*/
 
 
 // GET request served the page
 if (server_data.init === "init") {
     console.log(`GET request rendered page... building empty heatmap`);
     console.log(`server_data: ${server_data}`);
+    // the page rendering appears faster if the initial empty heatmap is 
+    // sent from the server rather than using AJAX
+    /*
+    $.get("initializeHeatmap", function(response) {
+        let heatmapDiv = $("#heatmap");
+        heatmapDiv.empty(); // should already be empty but just in case
+        //heatmapDiv.html("<p>hello world</p>");
+        buildHeatmap(response);
+    });
+    */
     buildHeatmap(server_data);
 };
 
