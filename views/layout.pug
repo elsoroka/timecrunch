@@ -5,7 +5,7 @@ html(lang='en')
         meta(charset='utf-8')
         meta(name='viewport', content='width=device-width, initial-scale=1')
         link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
-        script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js')
+        script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
         script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
         script(src='https://d3js.org/d3.v4.js')
         link(rel='stylesheet', href='/stylesheets/style.css')
@@ -22,22 +22,22 @@ html(lang='en')
     - let date = new Date();
     - let weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     - let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
     - let dateString = weekdayNames[date.getDay()] + " " + date.getHours() + ":" + ("00" + date.getMinutes()).slice(-2) + ":" + ("00" + date.getSeconds()).slice(-2) + ":" + date.getMilliseconds() +  " " + date.getDate() + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
 
     - console.log(`data = ${server_data}`);
     - console.log(`data.init = ${server_data.init}`);
-    - if (server_data.init == "init")
-      - console.log("init..lol " + dateString); 
+    - if (server_data.init != undefined)
+      - console.log(`[${dateString}] layout.pug executing server side`)
     - //script(src='/scripts/heatmap-d3.js')
     script
         .
             let server_data = !{JSON.stringify(server_data)};
-            let weekdayNames_cus = !{JSON.stringify(server_data.weekdayNames_cus)};
+            let weekdayNames = !{JSON.stringify(server_data.weekdayNames)};
             let timeIncrements = !{JSON.stringify(server_data.timeIncrements)};
             let hm = !{JSON.stringify(server_data.heatmap)};
             console.log("please.." + !{JSON.stringify(server_data.heatmap)});
         include ../public/scripts/heatmap-d3.js
+        include ../public/scripts/input-control.js
 
     - //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
 
