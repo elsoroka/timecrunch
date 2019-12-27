@@ -6,6 +6,7 @@ $( function() {
     let deptList = ['--Select Department--'];
     let divisionList = ['--Select Division--'];
     let selectedUniversityName = undefined;
+    let demographicRowId = 0;
 
     /*
      * Programmatically create a department selection drop down box
@@ -40,6 +41,20 @@ $( function() {
         }
     }
 
+    // div col-auto
+    //      <(Click to Add Dept)>  <(click to Add Division)>
+    // div col with a button in it
+    function createButtonColumn(couplingClass, uniqueId, buttonText) { 
+        let col = document.createElement("div");
+        let btn = document.createElement("button");
+        // apply class to column and id to button
+        col.className = `col-auto ${couplingClass}`;
+        btn.id = uniqueId;
+        btn.innerHTML = `<p>${buttonText}</p>`; // label the button
+        $(btn).appendTo(col); // place button in the column
+        return col;
+    };
+
     ///////////////////////
     /* School Selection */
     //////////////////////
@@ -67,9 +82,9 @@ $( function() {
 
                     // load university's departments as list
                     deptList = new Set([...deptList, ...res.departments]) // remember these corresponding school departments
-                    divisionList = new Set([...divisionList, ...res.divisions]) // remember these corresponding school departments
+                    divisionList = new Set([...divisionList, ...res.divisions]) // remember these corresponding school divisions
 
-                    // TODO: send the id of the group (first argument below) from pug programmatically 
+                    // TODO: send the id of the group (first argument below) from pug programmatically, they correspond to input-form.pug
                     // alls of these settings accept the lists actually seem like they should be defined as instances 
                     // of a Demographic Class in the server and passed here
                     demographics.push(makeDemographicObject("#departments-group", deptList,
@@ -79,6 +94,49 @@ $( function() {
                                                             divsNameLabel ,"Division:",
                                                             "division-selection form-control", divsNameLabel, divsNameLabel));
 
+                    // clear demographic row id
+                    demographicRowId = 0;
+                    let rowId = `demographic-row-${demographicRowId}`; 
+                    let buttonIdPrefix = `button-${rowId}`;
+                    
+                    //create the row from the inside out with the help of jquery's .wrap() function
+                    //makeDemographicButtons(rowId, buttonIdPrefix);
+                    // make two div columns each with a button inside:
+                    // require that the two buttons be linked via a class name that no other buttons have
+                    // and that the button itself can be uniquely identified via rowNum + [div|dep]
+                    let divisionButtonColumn    = createButtonColumn(buttonIdPrefix, `${buttonIdPrefix}-add-div`, "Add Division");  
+                                                                    //  uniqueId,                    buttonText
+                    let departmentButtonColumn  = createButtonColumn(buttonIdPrefix, `${buttonIdPrefix}-add-dep}`, "Add Column");
+
+                    // attach the coupled buttons to the row container without a row
+                    $("#demographics-rows-group").append(divisionButtonColumn);
+                    $("#demographics-rows-group").append(departmentButtonColumn);
+                    
+                    // create a div form-row to hold the columns
+                    let formRowDiv = document.createElement("div");
+                    formRowDiv.className = "form-row";
+                    formRowDiv.id = rowId;
+
+                    // use their common class of the columns to safely wrap them and nothing else 
+                    $(`.${buttonIdPrefix}`).wrapAll( $(formRowDiv) );
+                    // We now have have a row with two buttons in it
+
+
+
+                    /*
+                    // add "Demographic" div
+                    let demographicsDiv = $("#demographics-rows-group")
+                    let formRowDiv = document.createElement("div");
+                        .appendTo(demographicsDiv);
+                    //demographicsDiv.append($("<div class=row>")
+                    // append Division Div to DemographicRow
+                    let demographicsRow = $(rowId);
+                    $(demographicsRow)
+                        .append(makeDemographicButtons(idx, html));
+                        .appendTo(demographicsRow);
+                    */
+
+                    /*
                     demographics.forEach(dem => {
                         // clear any previous input boxes and start fresh
                         dem.dropDowns.empty();
@@ -87,6 +145,8 @@ $( function() {
                         let labeledDemographicSelect = makeDemographicDropDown(dem.demographicList, dem.labelSettings, dem.dropDownSettings);
                         dem.dropDowns.append(labeledDemographicSelect);
                     });
+                    */
+
                 });
             }
         }

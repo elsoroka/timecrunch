@@ -4,7 +4,7 @@ const interfaceController = require('../controllers/interface-controller'); // f
 
 /* GET initial page state */
 router.get('/', interfaceController.initializePage);
-router.get('/initializeHeatmap', interfaceController.renderEmptyHeatmap);
+//router.get('/initializeHeatmap', interfaceController.renderEmptyHeatmap); // perceptually faster loading to send the empty heatmap directly
 
 /* GET to set school */
 router.get('/setSchool', interfaceController.setSchool);
