@@ -104,8 +104,6 @@ function parseDescriptionString(descriptionString) {
 
 	// The next bit is the important one with the dates/times/enrollment count
 	console.log("classNum, sectionNum, courseType:", classNum, sectionNum, courseType);
-	console.log("The last bit is:", substrings[index]);
-	
 	// Retrieve the enrollment count
 	let dataString = substrings[index];
 	let enrolled=0;
@@ -114,8 +112,16 @@ function parseDescriptionString(descriptionString) {
 	dataString = dataString.slice(newIndex);
 	console.log("RESULT", enrolled, "\nremaining", dataString);
 
-	meeting = parseScheduleString(dataString);
-	console.log("Meeting", meeting);
+	// Retrieve multiple meetings from the remainder of the string.
+	let meetings = [];
+	let meeting = null;
+	do {
+		[meeting, dataString] = parseScheduleString(dataString);
+		if (null != meeting) {
+			console.log("Meeting", meeting);
+			meetings.push(meeting);
+		}
+	} while (meeting != null);
 }
 
 /* Operates on the schedule portion of the string, which looks like:
@@ -143,7 +149,6 @@ function parseScheduleString(dataString) {
 	
 	// Save a piece of the string before the times, assuming it contains the days
 	const dayString = dataString.slice(0, matchIndex);
-	console.log("Days only:", dayString);
 	// Cut off the days and the startTime
 	dataString = dataString.slice(newIndex);
 
@@ -154,9 +159,8 @@ function parseScheduleString(dataString) {
 	// Find the days in the piece we saved (returns [] if none found)
 	days = parseDays(dayString);
 
-	// Couldn't find times/days
+	// Couldn't find times/days, this is OK because it happens at the end of the string.
 	if ((null == startTime) || (null == endTime) || (0 == days.length)) {
-		console.log("Parser FAILED! Couldn't find time/day in:", dataString);
 		return [null, dataString]
 	}
 
@@ -253,6 +257,14 @@ function testParser() {
 		Instructors: Alonso, J. (PI)",
 		"AA 229 | 3-4 units | Class # 19492 | Section 01 | Grading: Letter or Credit/No Credit | LEC | \
 		Students enrolled: 15 01/06/2020 - 03/13/2020 Mon, Wed 1:30 PM - 2:50 PM at McMurtry Building 102, Oshman with Kochenderfer, M. (PI)",
+		// A test case with an exam date listing
+		"CEE 107A | 3-5 units | UG Reqs: GER:DB-EngrAppSci, WAY-SI | Class # 7814 | Section 01 | Grading: Letter or Credit/No Credit | LEC | Students enrolled: 23\
+		09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115 with Gragg, D. (PI); Stasio, K. (PI); Woodward, J. (PI)\
+		Exam Date/Time: 2019-12-11 3:30pm - 6:30pm (Exam Schedule)",
+		// A test case with multiple meetings
+		"CEE 322 | 3 units | Class # 7893 | Section 01 | Grading: Letter or Credit/No Credit | LEC | Students enrolled: 25\
+		09/23/2019 - 12/06/2019 Mon, Wed 1:30 PM - 2:50 PM at 380-380W with Rajagopal, R. (PI)\
+		09/23/2019 - 12/06/2019 Fri 9:30 AM - 10:50 AM at McCullough 126 with Rajagopal, R. (PI)",
 		];
 	testInputs.map( (testInput, _) => parseDescriptionString(testInput) );
 }
