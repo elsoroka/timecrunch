@@ -100,7 +100,7 @@ function parseDescriptionString(descriptionString) {
 			meetings.push(meeting);
 		}
 	} while (meeting != null);
-	console.log("Enrolled", enrolled, "Meetings", meetings);
+	// console.log("Enrolled", enrolled, "Meetings", meetings);
 	// Something is wrong, we didn't find any meetings at all. Crash.
 	if ([] == meetings) {
 		console.log("\nWARNING: NO schedule found in:", descriptionString);
