@@ -3,8 +3,11 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-// testing code, please remove?
-run(undefined);
+// testing code, please remove
+run({term:"Winter 2020", "department":"AA", "division":"Graduate"});
+console.log("\n\n");
+run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
+
 
 async function run(options) {
 	/*options = {
@@ -15,10 +18,11 @@ async function run(options) {
     // Example URL
 	// https://explorecourses.stanford.edu/print?filter-term-Winter=on&filter-catalognumber-AA=on&filter-academiclevel-GR=on&filter-coursestatus-Active=on&filter-catalognumber-AA=on&q=AA&descriptions=on&schedules=on
 	// Large testcase URL
-	let url = "https://explorecourses.stanford.edu/search?q=AA&view=timeschedule&filter-term-Winter=on&academicYear=&filter-catalognumber-AA=on&page=0&filter-coursestatus-Active=on&collapse="
+	// let url = "https://explorecourses.stanford.edu/search?q=AA&view=timeschedule&filter-term-Winter=on&academicYear=&filter-catalognumber-AA=on&page=0&filter-coursestatus-Active=on&collapse="
 	// Small testcase URL, 3 results
 	//const url = "https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=CS229&collapse=%2C6%2C7%2C"
-
+	
+	let url = makeUrlFromOptions(options);
 	let courses = [];
 	let count=0; // temp: interrupt infinite loops
 
@@ -32,15 +36,48 @@ async function run(options) {
 		// TODO: Can we optimize this concat?
 		// Premature optimization is the root of all evil.
 		courses.concat(newCourses);
-
+		// If we have another URL to fetch, wait 1/2 second.
 		if ("" != url) {
-			await wait(1000);
-			//console.log("\n\nWAITED 1s\n\n");
+			await wait(500);
 		}
     }
     return courses;
 }
 
+function makeUrlFromOptions(options) {
+	// Map long level names to abbreviations used in URL
+	const levelMap = {
+		"Graduate"                    : "GR",
+		"Undergraduate"               : "UG",
+		"Graduate School of Business" : "GSB",
+		"Law School"                  : "LAW",
+		"Medical School"              : "MED",
+	}
+	const level = levelMap[options.division];
+
+	/* Assumption: term is of the form "Quarter Year"
+	 * for example: "Winter 2020", "Fall 2019", etc.
+	 */
+	const [quarter, tmpYear] = options.term.split(' ');
+	const year = parseInt(tmpYear);
+
+	let academicYear = "";
+	// "Autumn 2019" belongs to the academicYear "2019-2020"
+	// "Winter 2020", "Spring 2020" and "Summer 2020" are in the year "2019-2020"
+	if ("Autumn" == quarter) {
+		academicYear = year.toString()+(year+1).toString();
+	}
+	else {
+		academicYear = (year-1).toString()+year.toString();
+	}
+	console.log("academicYear", academicYear);
+	return `https://explorecourses.stanford.edu/search?\
+q=${options.department}&view=timeschedule&filter-term-${quarter}=on\
+&academicYear=${academicYear}&filter-catalognumber-${options.department}=on\
+&filter-academiclevel-${level}=on&filter-coursestatus-Active=on&collapse=`
+}
+
+// Delay used to slow down between page requests.
 function wait(ms, value) {
     return new Promise(resolve => setTimeout(resolve, ms, value));
 }
@@ -315,6 +352,7 @@ function parseTime(timeString) {
 	}
 }
 
+/*
 function testParser() {
 	testInputs = [
 		"CEE 107A | 3-5 units | UG Reqs: GER:DB-EngrAppSci, WAY-SI | Class # 7814 | Section 01 | Grading: Letter or Credit/No Credit | LEC | \
@@ -339,10 +377,4 @@ function testParser() {
 ];
 	testInputs.map( (testInput, _) => parseDescriptionString(testInput) );
 }
-
-'<ul><li class="sectionDetails">CS 229  |  	3-4 units  | Class #7879 | Section 01  |	Grading: Letter or Credit/No Credit |  LEC | Students enrolled: 375	\
-	<br /> 09/23/2019 - 12/06/2019 Mon, Wed 9:30 AM - 10:50 AM at <a href="http:\/\/campus-map.stanford.edu/?srch=NVIDIA+Auditorium" target="_blank">NVIDIA Auditorium</a> with Charikar, M. (PI); Ng, A. (PI); Re, C. (PI); Chen, E. (TA); Ding, T. (TA); Jia, Z. (TA); Jin, Y. (TA); Khosla, K. (TA); Kurenkov, A. (TA); Li, J. (TA); She, J. (TA); Steinberg, E. (TA); Tlili, F. (TA); Xiong, Z. (TA); Yang, J. (TA); Zhang, K. (TA); Zhang, V. (TA)\
-	<br />\
-	<span class="boldText">Instructors: </span> Charikar, M. (PI); Ng, A. (PI); Re, C. (PI); Chen, E. (TA); Ding, T. (TA); Jia, Z. (TA); Jin, Y. (TA); Khosla, K. (TA); Kurenkov, A. (TA); Li, J. (TA); She, J. (TA); Steinberg, E. (TA); Tlili, F. (TA); Xiong, Z. (TA); Yang, J. (TA); Zhang, K. (TA); Zhang, V. (TA)\
-	<br />\
-	<span class="boldText">Notes: </span> May be taken for 3 units by graduate students. </li></ul>'
+*/
