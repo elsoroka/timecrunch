@@ -21,13 +21,22 @@ console.log(`[${getFormattedTimeStamp(new Date)}] Initializing heatmap...`);
 console.log(JSON.stringify(hm));
 console.log(weekdayNames);
 console.log(timeIncrements);
+
+[
+    {dep1, div1}
+    {dep2, div2}
+    {any, div3}
+]
+
+
+
 */
 
 
 // GET request served the page
 if (server_data.init === "init") {
     console.log(`GET request rendered page... building empty heatmap`);
-    console.log(`server_data: ${server_data}`);
+    console.log(`server_data: ${server_data.heatmap}`);
     // the page rendering appears faster if the initial empty heatmap is 
     // sent from the server rather than using AJAX
     /*
@@ -52,7 +61,12 @@ function buildHeatmap(heatmapJson) {
     // TODO: programmatically determine width and height 
     // set the dimensions and margins of the graph
     const margin = {top: 100, right: 25, bottom: 30, left: 70}
-    let width = Math.max(Math.min(document.getElementById('schedule-container').offsetWidth, 950),500) - margin.left - margin.right;
+    //let width = document.getElementById('schedule-container').offsetWidth - margin.left - margin.right;
+    console.log(`input-forrm-width= ${$('#user-input-form-container').width()}`);
+    console.log(`window-width= ${$(document).width()}`);
+    let remainingWidth =  $(document).width() - $('#user-input-form-container').width();
+
+    let width =  remainingWidth - margin.left - margin.right;
     let height = Math.max(Math.min(window.innerHeight,850),500)  - margin.top - margin.bottom;
 
     //window.onresize = function(){ location.reload(); }
@@ -74,20 +88,22 @@ function buildHeatmap(heatmapJson) {
      * Title
     */
     // Add title to graph
+    /*
     svg.append("text")
         .attr("x", 0)
         .attr("y", -60)
         .attr("text-anchor", "left")
         .style("font-size", "22px")
         .text("timecrunch");
+        */
 
     // Add subtitle to graph
     svg.append("text")
         .attr("x", 0)
-        .attr("y", -40)
+        .attr("y", -60)
         .attr("text-anchor", "left")
-        .style("font-size", "14px")
-        .style("fill", "grey")
+        .style("font-size", "22")
+        //.style("fill", "grey")
         .style("max-width", 400)
         .text("when are students in class?")
 
