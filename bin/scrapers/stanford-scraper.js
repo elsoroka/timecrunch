@@ -124,16 +124,32 @@ function parseDescriptionString(descriptionString) {
 	// Retrieve the days
 	let result = null, days = [];
 	do {
+		// Map days of week to indices
+		const dayMap = {"Mon":0, "Tue":1, "Wed":2, "Thu":3, "Fri":4, "Sat":5, "Sun":6};
+
 		[result, newIndex] = getMatch(dataString, /(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/, null);
 		dataString = dataString.slice(newIndex);
-		console.log("RESULT", result, "\nremaining", dataString);
 		
 		if (null != result) {
-			days.push(result);
+			days.push(dayMap[result]);
 		}
 	} while (null != result);
 
 	console.log("RESULT", days, "\nremaining", dataString);
+
+	// Retrieve the startTime
+	[startTime, newIndex] = getMatch(dataString, /((\d{1,2}:\d{1,2})\s(A|P)M)/, null);
+	dataString = dataString.slice(newIndex);
+	// Retrieve the endTime
+	[endTime, newIndex] = getMatch(dataString, /((\d{1,2}:\d{1,2})\s(A|P)M)/, null);
+	dataString = dataString.slice(newIndex);
+	// This should never happen
+	if ((null == startTime) || (null == endTime)) {
+		console.log("Parser FAILED! Couldn't find time in:", dataString);
+		return;
+	}
+	console.log("RESULT:", startTime, endTime, "\nDONE!");
+
 }
 
 
