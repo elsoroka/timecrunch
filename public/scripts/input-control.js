@@ -1,36 +1,96 @@
 // using jQuery
 $( function() {
-
     console.log(`hello from jquery`);
 
-    let deptList = ['--Select Department--'];
+    /* TODO: refactor
+     * integrating my codepen toy-example 
+     * so parts of this may look patchy and messy
+     * */
+    
+
+    Handlebars.registerHelper('var',function(name, value, context){
+      this[name] = value;
+    });
+
+    // Globals
+    let finishedArr = [];
+    let departmentDropdownCount = 0;
+    let departmentDropdownId = 0;
+    let divisionDropdownId = 0;  
+    let currentRow = 0;
+    let departmentList = ['--Select Department--'];
     let divisionList = ['--Select Division--'];
     let selectedUniversityName = undefined;
     let demographicRowId = 0;
 
+
+    const demographicDropdown = Handlebars.compile($("#demographic-dropdowns-template").html());
+
+    const demogButtons = Handlebars.compile($('#add-demographic-button-template').html());
+
+
     /*
-     * Programmatically create a department selection drop down box
+     * Programmatically create a demographic selection drop down box
      * This is somewhat like a client-side javascript version of 
      * the select_dept pug mixin in the old input-form.pug
      */
-    function makeDemographicDropDown(demList, labelSettings, dropDownSettings) {
-        let label = document.createElement("LABEL");
-        let dropDown = document.createElement("SELECT");
-        let breakElement = document.createElement("BR");
-        label.setAttribute("for", labelSettings.forAttr);
-        label.innerHTML = labelSettings.innerHTML;
-        dropDown.setAttribute("class", dropDownSettings.classAttr);
-        dropDown.setAttribute("id", dropDownSettings.idAttr);
-        dropDown.setAttribute("name", dropDownSettings.nameAttr);
+
+    function addOptionsToDemList(demList, dropdownContainer) {
+        let dropDown = $(`#${dropdownContainer} select`);
+        console.log(demList);
+        console.log(dropDown);
         demList.forEach(dem => {
             let option = document.createElement("option");
             option.text = dem;
-            dropDown.add(option);
+            dropDown.append(option);
         });
-        dropDown.selectedIndex = "0";
-        return [label, dropDown, breakElement];
-
     }
+
+    function replaceWithSelectionDropdowns(thisParent, dropdownTemplate, demographic) {
+        let department = demographic.department, 
+            division = demographic.division;
+
+        thisParent.html(dropdownTemplate({
+            departmentId: department.containerId,
+            divisionId: division.containerId
+        }));
+
+        addOptionsToDemList(department.demList, department.containerId);
+        addOptionsToDemList(division.demList, division.containerId);
+    }
+
+    // replace Add <Demographic> with corresponding Selection dropdown  box
+    $('#demographics-rows-group').on('click', 'button', function() {
+        if($(this).hasClass('add-demog-btn')) {
+            replaceWithSelectionDropdowns(
+                $(this).parent(), 
+                demographicDropdown,
+                { 
+                    department: { 
+                        containerId: `department-dropdown-${departmentDropdownId}`, 
+                        demList: departmentList 
+                    },
+                    division: { 
+                        containerId: `division-dropdown-${divisionDropdownId}`, 
+                        demList: divisionList 
+                    }
+                }
+            );
+
+            ++departmentDropdownId;
+            ++divisionDropdownId;
+            ++departmentDropdownCount;
+        }
+
+        // add next row of buttons 
+        $('#demographics-rows-group').append(demogButtons());
+    });
+
+    function finish() {
+        console.log(finishedArr);
+    }
+
+
 
     function makeDemographicObject(selectorStr, demList, forStr, innerHtmlString, classStr, idStr, nameStr){
         return {
@@ -81,71 +141,13 @@ $( function() {
                     let demographics = [];//new Array(2)
 
                     // load university's departments as list
-                    deptList = new Set([...deptList, ...res.departments]) // remember these corresponding school departments
+                    departmentList = new Set([...departmentList, ...res.departments]) // remember these corresponding school departments
                     divisionList = new Set([...divisionList, ...res.divisions]) // remember these corresponding school divisions
 
+                    // add first row of buttons -- when school choice is selected
+                    $('#demographics-rows-group').append(demogButtons());
+
                     // TODO: send the id of the group (first argument below) from pug programmatically, they correspond to input-form.pug
-                    // alls of these settings accept the lists actually seem like they should be defined as instances 
-                    // of a Demographic Class in the server and passed here
-                    demographics.push(makeDemographicObject("#departments-group", deptList,
-                                                            deptsNameLabel ,"Department:",
-                                                            "department-selection form-control", deptsNameLabel, deptsNameLabel));
-                    demographics.push(makeDemographicObject("#divisions-group", divisionList,
-                                                            divsNameLabel ,"Division:",
-                                                            "division-selection form-control", divsNameLabel, divsNameLabel));
-
-                    // clear demographic row id
-                    demographicRowId = 0;
-                    let rowId = `demographic-row-${demographicRowId}`; 
-                    let buttonIdPrefix = `button-${rowId}`;
-                    
-                    //create the row from the inside out with the help of jquery's .wrap() function
-                    //makeDemographicButtons(rowId, buttonIdPrefix);
-                    // make two div columns each with a button inside:
-                    // require that the two buttons be linked via a class name that no other buttons have
-                    // and that the button itself can be uniquely identified via rowNum + [div|dep]
-                    let divisionButtonColumn    = createButtonColumn(buttonIdPrefix, `${buttonIdPrefix}-add-div`, "Add Division");  
-                                                                    //  uniqueId,                    buttonText
-                    let departmentButtonColumn  = createButtonColumn(buttonIdPrefix, `${buttonIdPrefix}-add-dep}`, "Add Column");
-
-                    // attach the coupled buttons to the row container without a row
-                    $("#demographics-rows-group").append(divisionButtonColumn);
-                    $("#demographics-rows-group").append(departmentButtonColumn);
-                    
-                    // create a div form-row to hold the columns
-                    let formRowDiv = document.createElement("div");
-                    formRowDiv.className = "form-row";
-                    formRowDiv.id = rowId;
-
-                    // use their common class of the columns to safely wrap them and nothing else 
-                    $(`.${buttonIdPrefix}`).wrapAll( $(formRowDiv) );
-                    // We now have have a row with two buttons in it
-
-
-
-                    /*
-                    // add "Demographic" div
-                    let demographicsDiv = $("#demographics-rows-group")
-                    let formRowDiv = document.createElement("div");
-                        .appendTo(demographicsDiv);
-                    //demographicsDiv.append($("<div class=row>")
-                    // append Division Div to DemographicRow
-                    let demographicsRow = $(rowId);
-                    $(demographicsRow)
-                        .append(makeDemographicButtons(idx, html));
-                        .appendTo(demographicsRow);
-                    */
-
-                    /*
-                    demographics.forEach(dem => {
-                        // clear any previous input boxes and start fresh
-                        dem.dropDowns.empty();
-                        console.log(dem.demographicList);
-                        // add a drop-down box for the user to select a department
-                        let labeledDemographicSelect = makeDemographicDropDown(dem.demographicList, dem.labelSettings, dem.dropDownSettings);
-                        dem.dropDowns.append(labeledDemographicSelect);
-                    });
-                    */
 
                 });
             }
@@ -153,7 +155,17 @@ $( function() {
         $("#school-drop-down").blur();
     });
 
-
+    ///////////////////////////
+    /* Demographic Selection */
+    //////////////////////////
+    // Initialize school selection to placeholder
+    $("#school-drop-down").attr( "selectedIndex", 0 );
+    /*
+     * School Select Event Listener
+     * When the user selects a school from the drop down box
+     */
+    //$("#school-drop-down").change( function() {
+    
     /////////////////////////
     /* Submit Demographics */
     /////////////////////////
@@ -164,44 +176,59 @@ $( function() {
         return selectedUniversityName;
     }
 
-
     // warning: not using this right now using the more general version below 
     // but TODO: allow for things like lower MATH + upper ARABIC  etc.
-    function getSelectedDepartments() {
-        let depts = new Set();
-        $.each($(".department-selection option:selected"), function(){
-            if ($(this).val() === deptList[0]) // Don't add the placeholder
-                return;
-            depts.add($(this).val());
+    function getSelectedDemographic(thisRow, selectorStr, placeholder = "--Select ") {
+        let demRow = [] 
+        $.each(thisRow.find(selectorStr), function(_, option) {
+            if (!option.text.startsWith(placeholder))
+                demRow.push(option.text);
         });
-        return Array.from(depts);
+        return demRow;
+            //.reduce(function(options, opt) {
+            console.log(opt);
+            if (!this.value.startsWith(placeholder))
+                options.push(this.value);
+            return options;
+            console.log($(this).value);
+            console.log($(this).text);
+            console.log(this);
+            console.log(this.value);
+        //});
+        // no selection will have special meaning [-1] to be detected by server
+        return demRow;
     }
 
-    function getSelectedDemographic(selectorStr, placeholder) {
-        let depts = new Set();
-        $.each($(selectorStr), function(){
-            if ($(this).val() === placeholder) // Don't add the placeholder
-                return;
-            depts.add($(this).val());
+    function getDemographicRows(selectorStr, placeholder) {
+        let demographicRequest = [] //new Set();
+        // [ { [], [] },  ]
+        //
+        console.log(`dm`);
+        $.each($(".demographic-row"), function(){
+            let depts = getSelectedDemographic($(this), ".department-selection option:selected");
+            let divis = getSelectedDemographic($(this), ".division-selection option:selected");
+            let query = {departments: depts, divisions: divis}
+            console.log(`query=${query.departments}|${query.divisions}`);
+            demographicRequest.push(query);
         });
-        return Array.from(depts);
+        return demographicRequest;
     }
 
     function getDemographics() {
-        let demographics = new FormData();
-        university = getSelectedUniversity();
-        departments = getSelectedDemographic(".department-selection option:selected", deptList[0]);
-        divisions = getSelectedDemographic(".division-selection option:selected", divisionList[0]);
-        console.log(university);
-        console.log(departments);
-        console.log(divisions);
+        //let demographics = new FormData();
+        let demographics = {};//university: 
+        demographics.university =  getSelectedUniversity();
+        demographics.selections = getDemographicRows();
+        console.log(demographics.university);
+        console.log(demographics.selections[0]);
         // TODO: add divisions
         //divisions = getSelectedDivisions();
-        demographics.append('university', university);
-        demographics.append('departments', departments);
-        demographics.append('divisions', divisions);
+        //demographics.append('departments', departments);
         //demographics.append('divisions', divisions);
-        return new URLSearchParams(demographics); // express body-parser doesn't 
+        //demographics.append('divisions', divisions);
+        console.log(`json=${JSON.stringify(demographics)}`);
+        return demographics;
+        //return new URLSearchParams(demographics); // express body-parser doesn't 
         // accept FormData so send back as url encoded query params
         // cf. https://developer.mozilla.org/en-US/docs/Web/API/FormData
         /*
@@ -215,21 +242,23 @@ $( function() {
         */
     }
 
-    $("#demographics-form").submit( function(evt) {
-        console.log(`hello from department form event listener`);
+
+
+    $('#demographics-rows-group').change(function(evt) {
+        console.log(`hello from demographics rows event listener`);
         evt.preventDefault();
-        let postUrl = $(this).attr("action"); 
-        let requestMethod = $(this).attr("method");
-        let formData = getDemographics();
-        console.log(formData.toString());
-        for (let p of formData)
-            console.log(p);
+        let postUrl = '/timecrunch';//$(this).attr("action"); 
+        let requestMethod = "POST";//$(this).attr("method");
+        let demographicJson = JSON.stringify(getDemographics());
+        //console.log(formData.toString());
+        //for (let p of formData) console.log(p);
         $.ajax({
             url: postUrl,
             type:  requestMethod,
-            data: formData.toString()
+            data: demographicJson,
+            contentType: "application/json",
+            //dataType
             //cache: false,
-            //contentType: false,
             //processData: false,
         }).done(response => {
             let heatmapDiv = $("#heatmap");

@@ -1,0 +1,23 @@
+<!-- This looks like an HTML file but HandlebarsJS requires this HTML-like syntax -->
+<!-- This will be rendered by the browser via handlebars -->
+<div class="demographic-row d-flex">
+    <div id={{departmentId}}>
+        <div class='d-flex p-1'>
+            <div class='text-center'>
+                <label class='align-self-center' for="departmentSelection">Department:</label>
+                <select class='demographic-selection department-selection form-control align-self-center'>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id={{divisionId}}>
+        <div class='d-flex p-1'>
+            <div class='text-center'>
+                <label class='align-self-center' for="divisionSelection">Division:</label>
+                <select class='demographic-selection division-selection form-control align-self-center'>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>

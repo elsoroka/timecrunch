@@ -50,42 +50,54 @@ const executeQuery = (req, res, next) => {
     
     // debug messages
     console.log(`executyQuery:37:req.body=${req.body}`);
+    console.log(`executyQuery:37:req.body=${JSON.stringify(req.body)}`);
     console.log(`executyQuery:38:req.body.university=${req.body.university}`)
-    console.log(`executyQuery:39:req.body.departments=${req.body.departments}`)
-    console.log(toType(req.body.departments));
-    console.log(req.body.departments);
+    console.log(`executyQuery:39:req.body.selections=${req.body.selections}`)
+    console.log(toType(req.body.selections));
+    console.log(req.body.selections);
+
+
+    /*
     let departments = req.body.departments.split(',');//JSON.parse('[' + req.body.departments + ']');
     let divisions = req.body.divisions.split(',');
     console.log(departments);
     if (Array.isArray(req.body.departments)) console.log(`isarray`);
     if (Array.isArray(departments)) console.log(`isarray=${departments}`);
+    */
     // end debug
-    
 
-    // TODO: allow for specific divisions also
-        // Array.from(req.body.departments.split(",")); // this works too, deciding which is easier to read -> 
+    
     let union_of_conditions = []
     /*
      * Build OR'd Query
      */
-    departments.forEach(dept_name => {
-        if (dept_name != '')
-            union_of_conditions.push({department: dept_name})
+    req.body.selections.forEach(selection => {
+        // selection := {departments: [...], divisions:[...]} where [] means ANY
+        if (selection.divisions.length == 0) {
+            selection.departments.forEach(dept_name => 
+                union_of_conditions.push({department: dept_name})
+            );
+        }
+        else if (selection.departments.length == 0) {
+            selection.divisions.forEach(div_name => 
+                union_of_conditions.push({division: div_name})
+            );
+        }
+        else {
+            // deps X divs
+            selection.departments.forEach(dept_name => {
+                selection.divisions.forEach(div_name => {
+                    union_of_conditions.push({department: dept_name, division: div_name})
+                })
+            });
+        }
     });
-    divisions.forEach(div_name => {
-        if (div_name != '')
-            union_of_conditions.push({department: div_name})
-    });
+    console.log(`conditions=${JSON.stringify(union_of_conditions)}`);
 
-
-    // TODO: add divisions, but also later want to handle conditions like lower Math + upper CS
     // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
-    
-    // let divisions = division;
-    let for_university = { university: "uci" }; // TODO: allow user to choose university
-
+    let for_university = { university: req.body.university }; 
     // Build the query to get all courses 
-    let course_query = Course.find(for_university).or(union_of_conditions).orFail();//new Error("No courses found")); 
+    let course_query = Course.find().or(union_of_conditions).orFail();//new Error("No courses found")); 
     // Run the query, exec returns a Promise
     course_query.exec( function(err, courses) {
         if (err) return next(err); // TODO: catch and handle error: "No courses found" 

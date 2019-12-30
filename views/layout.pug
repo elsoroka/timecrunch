@@ -4,27 +4,33 @@ html(lang='en')
         title= title
         meta(charset='utf-8')
         meta(name='viewport', content='width=device-width, initial-scale=1')
-        link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css', integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous')
+
+        link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh", crossorigin="anonymous")
+        link(rel='stylesheet', href='/stylesheets/style.css')
 
         script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
-        script(src='https://d3js.org/d3.v4.js')
-        link(rel='stylesheet', href='/stylesheets/style.css')
-    body
-        div(id='schedule-form-container')
-            div(id='schedule-container')
-                div(id='heatmap')
-            div(id='user-input-form-container')
-                div(class='container-fluid')
-                    include input-form 
-                div(class='container-fluid')
-                    block content
-        div(id='footer')
-    - let date = new Date();
-    - let weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    - let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    - let dateString = weekdayNames[date.getDay()] + " " + date.getHours() + ":" + ("00" + date.getMinutes()).slice(-2) + ":" + ("00" + date.getSeconds()).slice(-2) + ":" + date.getMilliseconds() +  " " + date.getDate() + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous")
 
-    - console.log(`[${dateString}] layout.pug executing server side`)
+        script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6", crossorigin="anonymous")
+        script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
+        script(src='https://d3js.org/d3.v4.js')
+    body
+
+        script(id="demographic-dropdowns-template" type="text/x-handlebars-template")
+            include demographic-dropdowns-template.handlebars
+        script(id="add-demographic-button-template" type="text/x-handlebars-template")
+            include add-demographic-button-template.handlebars
+
+        div#schedule-form-container(class='d-flex flex-wrap')
+            div#user-input-form-container(class='p-3 flex-col')
+                div(id='input-form' class='flex-col')
+                    include input-form 
+                div(id='extra-error-div' class='container-fluid')
+                    block content
+            div(id='schedule-container' class='mr-auto w-1/2')
+                div(id='heatmap')
+        div(id='footer')
+    - console.log(`layout.pug executing server side`)
     script
         .
             let server_data = !{JSON.stringify(server_data)};
@@ -38,7 +44,4 @@ html(lang='en')
         include ../public/scripts/input-control.js
 
     - //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
-
-    script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous")
-    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous")
 

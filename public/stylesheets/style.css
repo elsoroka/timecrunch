@@ -1,5 +1,6 @@
+/* Page-Wide Defaults */
 body {
-  padding: 50px;
+  padding: 0px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -7,28 +8,52 @@ a {
   color: #00B7FF;
 }
 
-.sidebar-nav {
-    margin-top: 20px;
-    padding: 0;
-    list-style: none;
-}
+/* END Page-Wide Defaults */
 
 /* heatmap */
-/* /heatmap */
+/* END heatmap */
 
 /* input form */
-
-#schedule-form-container {
- height: 100%;
- width: 100%;
- display: flex;
+#university-label {
+    font-size: 22px
 }
 
+button {
+  background: lightgrey;
+  padding:10px
+}
+
+.add-demog-btn {
+    background: lightblue;
+    border-radius: 2em;
+}
+
+.hidden-buttons {
+  margin-top: 1em;
+  display: none;
+}
+
+/*
+.flex-box {
+   flex: 1;
+   flex-shrink: 0;
+}
+*/
+/* END input form */
+
+/* TODO: make the schedule-form wrap on small screens */
+#schedule-form-container { 
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+/*
 #schedule-container {
- width: 50%;
+    width: 50%;
 }
 
 #user-input-form-container {
- width: 50%;
+    width: 50%;
 }
+*/
 
