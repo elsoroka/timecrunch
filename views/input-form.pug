@@ -1,21 +1,24 @@
-- var dept_list = ['', 'AC ENG', 'ARABIC', 'MATH','IN4MATX'];
-mixin select_dept 
-    label(for='dept_names') Department Name:
-    select#dept_names.form-control(name='dept_names' )
-      each dept in dept_list
-        option(value=dept) #{dept}
+- let dept_list = [''] //, 'AC ENG', 'ARABIC', 'MATH','IN4MATX'];
+- let school_list = ['--Select University--', 'UCI'] //!{JSON.stringify(schools)}
 
+h2.timecrunch-title timecrunch
 
+div.form-row.align-items-center
+    div.col-auto.my-6
+        label#university-label.p-1.align-self-center.font-weight-bold(for='University') University:
+        select#school-drop-down(name='school-select' class='form-control')
+          for school in school_list
+            option(value=school) #{school}
 
-p.heatmap-title Select Demographic(s):
+br
+h6.input-form-title.p-1 Select Demographic(s):
 
-form(method='POST' action='')
-  div.form-group
-    +select_dept
-    +select_dept
-    +select_dept
-    +select_dept
-  button.btn.btn-primary(type='submit') Submit
+div#demographics-div(class='d-flex')
+    form(id='demographics-form' method='POST' action='')
+      div#demographics-rows-group.drop-down-selectors(class='flex-col')
+      - //div#departments-group.drop-down-dept-selectors
+      - //div#divisions-group.drop-down-division-selectors
+      br
 
 if errors
   ul

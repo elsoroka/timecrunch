@@ -14,10 +14,12 @@ class GenericHeatmap {
 		        defaultDays      = 5,
 		        timeFormat       = '12',
 		        ) {
+        // Debug Help
         this.class_id = "GenericHeatmap::";
         let get_id = (s) => this.class_id + s;
-        this.getRows_id = get_id("getRows:");
         this.constructor_id = get_id("constructor:");
+        this.getRows_id = get_id("getRows:");
+        this.getFill_id = get_id("getRows:");
         this.dbg = funct_id => {
             return (variable) => {
                 let varName = Object.keys(variable)[0];
@@ -67,8 +69,9 @@ class GenericHeatmap {
 	}
 
 	fill(courses) {
+        let dbg = this.dbg(this.getFill_id);
         courses.forEach(course => { 
-            this.dbg({course});
+            dbg({course});
             course.sections.forEach(section => {
                 section.meetings.forEach(meeting => { 
 
@@ -76,11 +79,11 @@ class GenericHeatmap {
                         return; // in a .forEach, this works like continue, i.e. goes to next element
                     const rows = this.getRows(meeting.startTime, meeting.endTime);
                     const cols = this.getCols(meeting.days);
-                    console.log("Rows", rows, "Cols", cols);
+                    //console.log("Rows", rows, "Cols", cols);
                     rows.forEach(row => { 
-                        console.log("row", row);
+                        //console.log("row", row);
                         cols.forEach( col => {
-                            console.log("col", col);
+                            //console.log("col", col);
                             this.heatmap[row][col] += section.enrolled;
                         }); //end for cols
                     }); // end for rows
@@ -168,6 +171,38 @@ class GenericHeatmap {
 		const alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 		return alldays.slice(0,this.days); 
 	}
+
+    /*
+     * This is the initially empty heatmap served to the client before 
+     * the user has posted a query.
+     * TODO: take another look with the instance methods to see is this
+     * they can re-use some of this code.
+     */
+    static emptyHeatmapJson() {
+        let max_time = 14*6; //14 hours in 10 minute increments
+        let incrementLabels = []//new Array(max_time).fill('    ');
+        let noon = 24; //  4*2*3 = 4 hours in 30 minute chunks
+        let mins = ':00'
+        for (let i = 0, hours = 8; i < max_time; i += 6) {
+            let ampm = i < noon ? 'a': 'p';
+            if (i && i % 6 == 0)
+                hours = (hours % 12) + 1;
+
+            //mins = i % 2 == 0 ? ':00' : ':30';
+            incrementLabels.push(hours + mins + ampm);
+        }
+        
+        let empty_heatmap = [...Array(max_time)].map(() => Array(5).fill(0));
+        console.log(JSON.stringify(empty_heatmap));
+
+        let heatmap_data = {
+            init: "init",
+            weekdayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            timeIncrements: incrementLabels,
+            heatmap: empty_heatmap
+        };
+        return heatmap_data;
+    }
 }
 
 module.exports = GenericHeatmap
