@@ -3,6 +3,9 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+// testing code, please remove?
+run(undefined);
+
 async function run(options) {
 	/*options = {
                     term: term,
@@ -19,57 +22,31 @@ async function run(options) {
 	let courses = [];
 	let count=0; // temp: interrupt infinite loops
 
-    while ((count < 2) && ("" != url)) {
+    while ((count < 10) && ("" != url)) {
     	console.log("\nGetting URL, count:", url, count);
     	count += 1;
-    	[newCourses, url] = await axios.get(url).then(onSuccessCallback)
+    	[newCourses, url] = await axios.get(url).then(getData)
     	.catch(error => {
 			console.log(error);
 		});
-		courses.concat(newCourses);
-		console.log("1. Got next URL:", url);
-		console.log("\n\nWAITING 1s\n\n");
-		await wait(1000);
-		console.log("\n\nWAITED 1s\n\n");
-    }
-}
-run(undefined);
-/*
-do {
-	console.log("\nGetting URL, count:", url, count);
-	count += 1;
-	axios.get(url).then(response => {
-		// getData does ALL the processing for a single page
-		// if there is another page, nextPage is a link string; otherwise it's "".
-		[newCourses, url] = getData(response.data);
-		console.log("1. Got next URL:", url);
-		// TODO: Can we optimize this?
+		// TODO: Can we optimize this concat?
 		// Premature optimization is the root of all evil.
 		courses.concat(newCourses);
-	})
-	.catch(error => {
-	console.log(error);
-});
-	console.log("2. Got next URL:", url);
-} while ((count < 2) && ("" != url));
-*/
 
-function onSuccessCallback(response) {
-	// getData does ALL the processing for a single page
-	// if there is another page, nextPage is a link string; otherwise it's "".
-	return getData(response.data);
-	//console.log("1. Got next URL:", url);
-	// TODO: Can we optimize this?
-	// Premature optimization is the root of all evil.
-	//courses.concat(newCourses);
+		if ("" != url) {
+			await wait(1000);
+			//console.log("\n\nWAITED 1s\n\n");
+		}
+    }
+    return courses;
 }
 
 function wait(ms, value) {
     return new Promise(resolve => setTimeout(resolve, ms, value));
 }
 
-let getData = html => {
-	const $ = cheerio.load(html);
+function getData(response) {
+	const $ = cheerio.load(response.data);
 	courses = [];
 
 	$('div[class^="searchResult"]').each(function(i, course) {
@@ -113,9 +90,9 @@ let getData = html => {
 	let nextLink = "";
 	links = {};
 	// There are several links on each page. It's easiest to choose the "next" page.
-	const linkResult = $('#pagination > a:contains("next")');
-	if (null != linkResult) {
-		nextLink = 'https://explorecourses.stanford.edu/'+linkResult.attr('href');
+	const linkResult = $('#pagination > a:contains("next")').attr('href');
+	if (undefined != linkResult) {
+		nextLink = 'https://explorecourses.stanford.edu/'+linkResult
 	}
 	return [courses, nextLink];
 }
