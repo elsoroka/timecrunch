@@ -23,7 +23,7 @@ let getData = html => {
 	data = [];
 	const $ = cheerio.load(html);
 	courses = [];
-	$('.searchResult').each(function(i, course) {
+	$('div[class^="searchResult"]').each(function(i, course) {
 		const courseInfo = $(".courseInfo", course);
 		const courseNumber = $(".courseNumber", courseInfo).text();
 		const courseTitle = $(".courseTitle", courseInfo).text();
