@@ -2,27 +2,76 @@
 
 const axios = require('axios');
 const cheerio = require('cheerio');
-testParser();
 
-// Example URL
-// https://explorecourses.stanford.edu/print?filter-term-Winter=on&filter-catalognumber-AA=on&filter-academiclevel-GR=on&filter-coursestatus-Active=on&filter-catalognumber-AA=on&q=AA&descriptions=on&schedules=on
-//const url = "https://explorecourses.stanford.edu/print?filter-term-Winter=on&filter-catalognumber-AA=on&filter-academiclevel-GR=on&filter-coursestatus-Active=on&filter-catalognumber-AA=on&q=AA&descriptions=on&schedules=on"
-// Small testcase URL, 3 results
+async function run(options) {
+	/*options = {
+                    term: term,
+                    department: deptName,
+                    division: division
+                };*/
+    // Example URL
+	// https://explorecourses.stanford.edu/print?filter-term-Winter=on&filter-catalognumber-AA=on&filter-academiclevel-GR=on&filter-coursestatus-Active=on&filter-catalognumber-AA=on&q=AA&descriptions=on&schedules=on
+	// Large testcase URL
+	let url = "https://explorecourses.stanford.edu/search?q=AA&view=timeschedule&filter-term-Winter=on&academicYear=&filter-catalognumber-AA=on&page=0&filter-coursestatus-Active=on&collapse="
+	// Small testcase URL, 3 results
+	//const url = "https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=CS229&collapse=%2C6%2C7%2C"
 
-const url = "https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=CS229&collapse=%2C6%2C7%2C"
-axios.get(url).then(response => {
-	//console.log(response);
-	getData(response.data);
-})
-.catch(error => {
+	let courses = [];
+	let count=0; // temp: interrupt infinite loops
+
+    while ((count < 2) && ("" != url)) {
+    	console.log("\nGetting URL, count:", url, count);
+    	count += 1;
+    	[newCourses, url] = await axios.get(url).then(onSuccessCallback)
+    	.catch(error => {
+			console.log(error);
+		});
+		courses.concat(newCourses);
+		console.log("1. Got next URL:", url);
+		console.log("\n\nWAITING 1s\n\n");
+		await wait(1000);
+		console.log("\n\nWAITED 1s\n\n");
+    }
+}
+run(undefined);
+/*
+do {
+	console.log("\nGetting URL, count:", url, count);
+	count += 1;
+	axios.get(url).then(response => {
+		// getData does ALL the processing for a single page
+		// if there is another page, nextPage is a link string; otherwise it's "".
+		[newCourses, url] = getData(response.data);
+		console.log("1. Got next URL:", url);
+		// TODO: Can we optimize this?
+		// Premature optimization is the root of all evil.
+		courses.concat(newCourses);
+	})
+	.catch(error => {
 	console.log(error);
 });
+	console.log("2. Got next URL:", url);
+} while ((count < 2) && ("" != url));
+*/
 
+function onSuccessCallback(response) {
+	// getData does ALL the processing for a single page
+	// if there is another page, nextPage is a link string; otherwise it's "".
+	return getData(response.data);
+	//console.log("1. Got next URL:", url);
+	// TODO: Can we optimize this?
+	// Premature optimization is the root of all evil.
+	//courses.concat(newCourses);
+}
+
+function wait(ms, value) {
+    return new Promise(resolve => setTimeout(resolve, ms, value));
+}
 
 let getData = html => {
-	data = [];
 	const $ = cheerio.load(html);
 	courses = [];
+
 	$('div[class^="searchResult"]').each(function(i, course) {
 		const courseInfo = $(".courseInfo", course);
 		const courseNumber = $(".courseNumber", courseInfo).text();
@@ -31,9 +80,8 @@ let getData = html => {
 		// If there is more than one section, there is more than one li sectionDetails.
 		let sections = [];
 		$('.sectionDetails', course).each(function(i, meeting) {
-			//console.log("\nRaw source\n", $(this).text());
+			// Find the location, which is always a link.
 			const location = $("a[target='_blank']", this).text();
-			console.log("Location", location);
 			let section = parseDescriptionString($(this).text());
 			if (null != section) {
 				// Fix the building listed in meetings
@@ -48,7 +96,6 @@ let getData = html => {
 		else {
 			console.log(courseNumber, courseTitle);
 			sections.map( function(section, _) {
-				console.log("Enrolled:", section.enrolled);
 				section.meetings.map( function(meeting, _) {
 					console.log("\t MEETING", meeting); });
 			});
@@ -61,7 +108,16 @@ let getData = html => {
 			});
 		}
 	});
-	return courses;
+
+	// Find the next page if it exists, otherwise use ""
+	let nextLink = "";
+	links = {};
+	// There are several links on each page. It's easiest to choose the "next" page.
+	const linkResult = $('#pagination > a:contains("next")');
+	if (null != linkResult) {
+		nextLink = 'https://explorecourses.stanford.edu/'+linkResult.attr('href');
+	}
+	return [courses, nextLink];
 }
 
 
@@ -191,7 +247,7 @@ function parseScheduleString(dataString) {
 			 endTime   : endTime,
 			 days      : days,
 			 timeIsTBA : false,
-			 bldg      : null}, dataString];
+			 bldg      : ""}, dataString];
 }
 
 // Turns out we don't really need these.
