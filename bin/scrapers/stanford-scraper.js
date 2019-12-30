@@ -32,7 +32,7 @@ let getData = html => {
 		let sections = [];
 		$('.sectionDetails', course).each(function(i, meeting) {
 			//console.log("\nRaw source\n", $(this).text());
-			const location = $('a', this).text();
+			const location = $("a[target='_blank']", this).text();
 			console.log("Location", location);
 			let section = parseDescriptionString($(this).text());
 			if (null != section) {
@@ -306,3 +306,10 @@ function testParser() {
 ];
 	testInputs.map( (testInput, _) => parseDescriptionString(testInput) );
 }
+
+'<ul><li class="sectionDetails">CS 229  |  	3-4 units  | Class #7879 | Section 01  |	Grading: Letter or Credit/No Credit |  LEC | Students enrolled: 375	\
+	<br /> 09/23/2019 - 12/06/2019 Mon, Wed 9:30 AM - 10:50 AM at <a href="http:\/\/campus-map.stanford.edu/?srch=NVIDIA+Auditorium" target="_blank">NVIDIA Auditorium</a> with Charikar, M. (PI); Ng, A. (PI); Re, C. (PI); Chen, E. (TA); Ding, T. (TA); Jia, Z. (TA); Jin, Y. (TA); Khosla, K. (TA); Kurenkov, A. (TA); Li, J. (TA); She, J. (TA); Steinberg, E. (TA); Tlili, F. (TA); Xiong, Z. (TA); Yang, J. (TA); Zhang, K. (TA); Zhang, V. (TA)\
+	<br />\
+	<span class="boldText">Instructors: </span> Charikar, M. (PI); Ng, A. (PI); Re, C. (PI); Chen, E. (TA); Ding, T. (TA); Jia, Z. (TA); Jin, Y. (TA); Khosla, K. (TA); Kurenkov, A. (TA); Li, J. (TA); She, J. (TA); Steinberg, E. (TA); Tlili, F. (TA); Xiong, Z. (TA); Yang, J. (TA); Zhang, K. (TA); Zhang, V. (TA)\
+	<br />\
+	<span class="boldText">Notes: </span> May be taken for 3 units by graduate students. </li></ul>'
