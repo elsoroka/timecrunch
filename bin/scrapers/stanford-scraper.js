@@ -102,10 +102,39 @@ function parseDescriptionString(descriptionString) {
 	}
 	index += 1;
 
-	// The next bit is the important one and god help us.
+	// The next bit is the important one with the dates/times/enrollment count
 	console.log("classNum, sectionNum, courseType:", classNum, sectionNum, courseType);
 	console.log("The last bit is:", substrings[index]);
-}	
+	let dataString = substrings[index];
+	
+	// Declaring some variables...
+	let enrolled=0, startTime=0, endTime=0
+	let startEndDate="";
+	
+	// Retrieve the enrolled count, which may be 0 but will not be null or undefined.
+	[enrolled, newIndex] = getMatch(dataString, /Students enrolled: (\d+) (\/ \d+)?/, 0);
+	dataString = dataString.slice(newIndex);
+	console.log("RESULT", enrolled, "\nremaining", dataString);
+	
+	// Retrieve the quarter start/end date
+	[startEndDate, newIndex] = getMatch(dataString, /(\d\d\/\d\d\/\d{4} - \d\d\/\d\d\/\d{4})/, "");
+	dataString = dataString.slice(newIndex);
+	console.log("RESULT", startEndDate, "\nremaining", dataString);
+
+	// Retrieve the days
+	let result = null, days = [];
+	do {
+		[result, newIndex] = getMatch(dataString, /(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/, null);
+		dataString = dataString.slice(newIndex);
+		console.log("RESULT", result, "\nremaining", dataString);
+		
+		if (null != result) {
+			days.push(result);
+		}
+	} while (null != result);
+
+	console.log("RESULT", days, "\nremaining", dataString);
+}
 
 
 function getClassNum(classNumStr) {
@@ -138,6 +167,26 @@ function getCourseType(courseTypeStr) {
 	}
 }
 
+/* FUNCTIONS which operate on a single string such as
+ * "Students enrolled: 23 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115"
+ * Each function returns an array [value, newIndex]
+ * The value is the value the function was looking for
+ * (for example, number of enrolled students)
+ * The newIndex is the new start of the string, without the part we just used
+ */
+
+function getMatch(textStr, pattern, returnOnNoMatch) {
+	const result = textStr.match(pattern);
+	if (null != result) {
+		const firstGroup = result[1];
+		const newIndex = result.index + result[0].length;
+		return [firstGroup, newIndex];
+	}
+	else {
+		console.log("Didn't find match");
+		return [returnOnNoMatch, 0];
+	}
+}
 
 function testParser() {
 	testInput1 = "CEE 107A | 3-5 units | UG Reqs: GER:DB-EngrAppSci, WAY-SI | Class # 7814 | Section 01 | Grading: Letter or Credit/No Credit | LEC | Students enrolled: 23 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115";
