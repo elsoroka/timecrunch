@@ -56,61 +56,40 @@ Grading: Letter or Credit/No Credit | LEC | Students enrolled: 23
 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115
 */
 function parseDescriptionString(descriptionString) {
-	// Split by |
+	// Split by "|"
 	substrings = descriptionString.split('|').map((item, _) =>
 		item.trim()); // Remove stray whitespace
-	console.log("rimmed:", substrings);
-
-	// Assumption: At least 7 items in string
-	if (7 > substrings.length) {
-		// Bad news
-		console.log("Parser FAILED! Not enough substrings: found ",
-					substrings.length, "in", descriptionString);
-		return;
-	}
-	// Skip the first 2 items, class name and unit count
-	let index = 2;
-
-	// The next is either class number or UG Reqs which we don't want
-	let classNum = getClassNum(substrings[index]);
-	if ("" == classNum) {
-		index += 1; // Skip it
-		classNum = getClassNum(substrings[index]);
-		if ("" == classNum) {
-			console.log("Parser FAILED! Couldn't find class number. Found:", substrings[0]);
-			return;
+	console.log("Trimmed:", substrings);
+	/* Assumption:
+	 * The first 2 substrings are course name and unit count.
+	 * We already know the name and don't care about the count.
+	 * The class #, section #, and grading option must appear (3 more substrings)
+	 * Other sections such as UG Reqs may be interspersed, but this is not guaranteed.
+	 * We can safely skip at least 5 substrings and scan for the course type (LEC, DIS, LAB...)
+	 */
+	let index = 5;
+	// Find the course type
+	let courseType = "";
+	do {
+		courseType = getCourseType(substrings[index]);
+		index += 1;
+		// If we go out of bounds, this is a failure
+		if (substrings.length <= index) {
+			console.log("Parser FAILED! Couldn't find course type in:", substrings);
+			return null;
 		}
-	}
-	index += 1;
-	
-	// If we got here, we have the class number and the next item is section number
-	let sectionNum = getSection(substrings[index]);
-	if ("" == sectionNum) {
-		console.log("Parser FAILED! Couldn't find section number. Found:", substrings[index]);
-		return;
-	}
-	index += 1;
-	
-	// If we got here, skip the grading section
-	index += 1;
+	} while ("" == courseType);
 
-	// Now we have the course type
-	let courseType = getCourseType(substrings[index]);
-	if ("" == courseType) {
-		console.log("Parser FAILED! Couldn't find course type. Found:", substrings[index]);
-		return;
-	}
-	index += 1;
-
-	// The next bit is the important one with the dates/times/enrollment count
-	console.log("classNum, sectionNum, courseType:", classNum, sectionNum, courseType);
+	/* Assumption:
+	 * The section directly after course type contains the scheduling information.
+	 */
 	// Retrieve the enrollment count
 	let dataString = substrings[index];
 	let enrolled=0;
 	// Retrieve the enrolled count, which may be 0 but cannot be null or undefined.
 	[enrolled, _, newIndex] = getMatch(dataString, /Students enrolled: (\d+) (\/ \d+)?/, 0);
 	dataString = dataString.slice(newIndex);
-	console.log("RESULT", enrolled, "\nremaining", dataString);
+	// console.log("RESULT", enrolled, "\nremaining", dataString);
 
 	// Retrieve multiple meetings from the remainder of the string.
 	let meetings = [];
@@ -118,10 +97,20 @@ function parseDescriptionString(descriptionString) {
 	do {
 		[meeting, dataString] = parseScheduleString(dataString);
 		if (null != meeting) {
-			console.log("Meeting", meeting);
 			meetings.push(meeting);
 		}
 	} while (meeting != null);
+	console.log("Enrolled", enrolled, "Meetings", meetings);
+	// Something is wrong, we didn't find any meetings at all. Crash.
+	if ([] == meetings) {
+		console.log("\nWARNING: NO schedule found in:", descriptionString);
+	}
+
+	// Return the sections (remember we haven't got the location in the meetings yet)
+	return {
+		enrolled:enrolled,
+		meetings:meetings,
+	}
 }
 
 /* Operates on the schedule portion of the string, which looks like:
@@ -156,6 +145,10 @@ function parseScheduleString(dataString) {
 	[endTime, newIndex] = getMatch(dataString, /((\d{1,2}:\d{1,2})\s(A|P)M)/, null);
 	dataString = dataString.slice(newIndex);
 
+	// Convert times from string to minutes past 00:00.
+	startTime = parseTime(startTime);
+	endTime   = parseTime(endTime);
+
 	// Find the days in the piece we saved (returns [] if none found)
 	days = parseDays(dayString);
 
@@ -177,7 +170,8 @@ function parseScheduleString(dataString) {
 			 bldg      : null}, dataString];
 }
 
-
+// Turns out we don't really need these.
+/*
 function getClassNum(classNumStr) {
 	if (classNumStr.startsWith("Class #")) {
 		return classNumStr.slice(7).trim();
@@ -194,7 +188,7 @@ function getSection(sectionStr) {
 	else {
 		return "";
 	}
-}
+	*/
 
 function getCourseType(courseTypeStr) {
 	const courseTypes = ["LEC", "SEM", "DIS", "LAB", "LBS", "ACT",
@@ -208,12 +202,10 @@ function getCourseType(courseTypeStr) {
 	}
 }
 
-/* FUNCTIONS which operate on a single string such as
- * "Students enrolled: 23 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115"
- * Each function returns an array [value, newIndex]
- * The value is the value the function was looking for
- * (for example, number of enrolled students)
- * The newIndex is the new start of the string, without the part we just used
+/* Generic function to match a pattern in a string or return a specified value.
+ * Returns an array [firstMatchGroup, startIndexOfMatch, endIndexOfMatch]
+ * This is used to find the days, times, quarter start/end, etc.
+ * endIndexOfMatch points to the new start of the string, after the match we just found.
  */
 
 function getMatch(textStr, pattern, returnOnNoMatch) {
@@ -246,6 +238,24 @@ function parseDays(dataString) {
 		}
 	} while (null != result);
 	return days;
+}
+
+// Given a string like "11:30 AM" or "12:00PM", return the time as minutes since 00:00
+// "It is not recommended to use Date.parse" ~Mozilla
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse
+function parseTime(timeString) {
+	// It is possible to get a null here
+	if (null == timeString) {
+		return null;
+	}
+	// The first group is the hours, the second is minutes, the third is AM or PM
+	result = timeString.match(/(\d{1,2}):(\d{2})\s?(A|P)M/);
+	if ((null != result) && (4 == result.length)) {
+		return parseInt(result[1])*60 + parseInt(result[2]) + ("PM" == result[3] ? 12*60 : 0);
+	}
+	else {
+		return null; // Failed to find it
+	}
 }
 
 function testParser() {
