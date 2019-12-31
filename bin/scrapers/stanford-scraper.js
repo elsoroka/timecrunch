@@ -8,7 +8,7 @@ const path = require("path");
 // testing code, please remove
 //run({term:"Winter 2020", "department":"AA", "division":"Graduate"});
 //console.log("\n\n");
-//run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
+run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
 
 /*    EXPORTED FUNCTIONS FOR run-scraper.js    */
 
@@ -67,29 +67,25 @@ async function run(options) {
 			course.division = options.division;
 			course.university = name();
 		});
-		courses.concat(newCourses);
+		courses = courses.concat(newCourses);
 
 		// Print neatly for debugging
+		/*
 		newCourses.map( function(course, _) {
 			console.log(course);
 			course.sections.map( function(section, _) {
 				section.meetings.map( function(meeting, _) {
-					console.log("\t MEETING", meeting);
+					// console.log("\t MEETING", meeting);
 				});
 			});
-		});
+		});*/
 		// If we have another URL to fetch, wait 1/2 second.
 		if ("" != url) {
 			await wait(500);
 		}
     }
+    // console.log("Returning", courses.length, "courses");
     return courses;
-}
-
-// our "process" doesn't do anything because the data is returned
-// in correct format by run().
-function process(courses) {
-	return courses;
 }
 
 
@@ -420,4 +416,4 @@ function testParser() {
 }
 */
 
-module.exports = {departments, levels, name, currentTerm, run, process}
+module.exports = {departments, levels, name, currentTerm, run}
