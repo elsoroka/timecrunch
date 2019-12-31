@@ -4,10 +4,31 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 // testing code, please remove
-run({term:"Winter 2020", "department":"AA", "division":"Graduate"});
-console.log("\n\n");
+//run({term:"Winter 2020", "department":"AA", "division":"Graduate"});
+//console.log("\n\n");
 run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
 
+/*    EXPORTED FUNCTIONS FOR run-scraper.js    */
+
+function departments() {
+	let depts = fs.readFileSync(path.resolve(__dirname, "stanford-depts.txt"), "utf-8").split('\n');
+	return depts;
+}
+
+function levels() {
+	// These are the levels available on exploreCourses.
+	return ["Graduate","Undergraduate",
+			"Graduate School of Business","Law School","Medical School"];
+}
+
+function name() {
+	return "Stanford University";
+}
+
+// TODO: FIX THIS
+function currentTerm() {
+	return "2020 Winter";
+}
 
 async function run(options) {
 	/*options = {
@@ -22,20 +43,39 @@ async function run(options) {
 	// Small testcase URL, 3 results
 	//const url = "https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=CS229&collapse=%2C6%2C7%2C"
 	
-	let url = makeUrlFromOptions(options);
+	let [url, term] = makeUrlAndTermFromOptions(options);
 	let courses = [];
 	let count=0; // temp: interrupt infinite loops
 
     while ((count < 10) && ("" != url)) {
     	console.log("\nGetting URL, count:", url, count);
     	count += 1;
-    	[newCourses, url] = await axios.get(url).then(getData)
-    	.catch(error => {
-			console.log(error);
-		});
-		// TODO: Can we optimize this concat?
+    	[newCourses, url] = await axios.get(url)
+	    	.then(response => {
+	    		return getData(response, term);
+	    	})
+    		.catch(error => {
+				console.log(error);
+			});
+		// TODO: Can we optimize this?
 		// Premature optimization is the root of all evil.
+		// Add the department and division
+		newCourses.map( function(course, _) {
+			course.department = options.department;
+			course.division = options.division;
+			course.university = name();
+		});
 		courses.concat(newCourses);
+
+		// Print neatly for debugging
+		newCourses.map( function(course, _) {
+			console.log(course);
+			course.sections.map( function(section, _) {
+				section.meetings.map( function(meeting, _) {
+					console.log("\t MEETING", meeting);
+				});
+			});
+		});
 		// If we have another URL to fetch, wait 1/2 second.
 		if ("" != url) {
 			await wait(500);
@@ -44,7 +84,20 @@ async function run(options) {
     return courses;
 }
 
-function makeUrlFromOptions(options) {
+// our "process" doesn't do anything because the data is returned
+// in correct format by run().
+function process(courses) {
+	return courses;
+}
+
+
+/*    PRIVATE FUNCTIONS FOR SCRAPING AND PARSING    */
+
+// Given the options defined in the scraper interface
+// make an explorecourses query URL
+// and write the term the way explorecourses does - year quarter
+// for example: 2019 - 2020 Winter
+function makeUrlAndTermFromOptions(options) {
 	// Map long level names to abbreviations used in URL
 	const levelMap = {
 		"Graduate"                    : "GR",
@@ -61,44 +114,53 @@ function makeUrlFromOptions(options) {
 	const [quarter, tmpYear] = options.term.split(' ');
 	const year = parseInt(tmpYear);
 
-	let academicYear = "";
+	let startYear="", endYear="";
 	// "Autumn 2019" belongs to the academicYear "2019-2020"
 	// "Winter 2020", "Spring 2020" and "Summer 2020" are in the year "2019-2020"
 	if ("Autumn" == quarter) {
-		academicYear = year.toString()+(year+1).toString();
+		startYear = year.toString();
+		endYear = (year+1).toString();
 	}
 	else {
-		academicYear = (year-1).toString()+year.toString();
+		startYear = (year-1).toString();
+		endYear = year.toString();
 	}
-	console.log("academicYear", academicYear);
-	return `https://explorecourses.stanford.edu/search?\
+	const url = `https://explorecourses.stanford.edu/search?\
 q=${options.department}&view=timeschedule&filter-term-${quarter}=on\
-&academicYear=${academicYear}&filter-catalognumber-${options.department}=on\
-&filter-academiclevel-${level}=on&filter-coursestatus-Active=on&collapse=`
+&academicYear=${startYear}${endYear}&filter-catalognumber-${options.department}=on\
+&filter-academiclevel-${level}=on&filter-coursestatus-Active=on&collapse=`;
+	return [url, startYear+'-'+endYear+' '+quarter];
 }
-
 // Delay used to slow down between page requests.
 function wait(ms, value) {
     return new Promise(resolve => setTimeout(resolve, ms, value));
 }
 
-function getData(response) {
+function getData(response, term) {
 	const $ = cheerio.load(response.data);
 	courses = [];
 
+	// Find all the searchResult divs, which contain 1 class listing each.
 	$('div[class^="searchResult"]').each(function(i, course) {
 		const courseInfo = $(".courseInfo", course);
 		const courseNumber = $(".courseNumber", courseInfo).text();
 		const courseTitle = $(".courseTitle", courseInfo).text();
+
+		// Filter course listing by term.
+		// example: EE 364 is taught winter/summer.
+		// Both are listed in a query for winter OR summer EE classes.
+		// Locate the one we want.
+		const sectionContainer = $(`.sectionContainerTerm:contains("${term}")`, course).parent();
 		// Retrieve schedule data for one term
 		// If there is more than one section, there is more than one li sectionDetails.
 		let sections = [];
-		$('.sectionDetails', course).each(function(i, meeting) {
+		$('.sectionDetails', sectionContainer).each(function(i, meeting) {
 			// Find the location, which is always a link.
 			const location = $("a[target='_blank']", this).text();
+			// Attempt to retrieve a section object from the string
 			let section = parseDescriptionString($(this).text());
 			if (null != section) {
-				// Fix the building listed in meetings
+				// Fix the building in the meeting object
 				section.meetings.map( (meeting, _) => meeting.bldg = location );
 				sections.push(section);
 			}
@@ -108,17 +170,13 @@ function getData(response) {
 			console.log("WARNING: No valid sections found. Skipping:", courseTitle);
 		}
 		else {
-			console.log(courseNumber, courseTitle);
-			sections.map( function(section, _) {
-				section.meetings.map( function(meeting, _) {
-					console.log("\t MEETING", meeting); });
-			});
 			courses.push({
-				division:"Graduate",
-				department:"AA",
+				division:"",
+				department:"",
 				courseNumber:courseNumber,
 				courseTitle:courseTitle,
 				sections:sections,
+				term:term,
 			});
 		}
 	});
@@ -264,26 +322,7 @@ function parseScheduleString(dataString) {
 			 bldg      : ""}, dataString];
 }
 
-// Turns out we don't really need these.
-/*
-function getClassNum(classNumStr) {
-	if (classNumStr.startsWith("Class #")) {
-		return classNumStr.slice(7).trim();
-	}
-	else {
-		return "";
-	}
-}
-
-function getSection(sectionStr) {
-	if (sectionStr.startsWith("Section")) {
-		return sectionStr.slice(7).trim();
-	}
-	else {
-		return "";
-	}
-	*/
-
+// Figure out what type of class it is.
 function getCourseType(courseTypeStr) {
 	const courseTypes = ["LEC", "SEM", "DIS", "LAB", "LBS", "ACT",
 	"CAS", "COL", "WKS", "INS", "IDS", "ISF", "ISS", "ITR", "API",
@@ -378,3 +417,5 @@ function testParser() {
 	testInputs.map( (testInput, _) => parseDescriptionString(testInput) );
 }
 */
+
+module.exports = {departments, levels, name, currentTerm, run, process}
