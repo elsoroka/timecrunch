@@ -1,7 +1,9 @@
 /* Page-Wide Defaults */
 body {
   padding: 0px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  /*
+   * font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+   */
 }
 
 a {
@@ -10,8 +12,9 @@ a {
 
 /* END Page-Wide Defaults */
 
-/* heatmap */
-/* END heatmap */
+#timecrunch-title {
+    font-family: Roboto, "Lucida Grande", Helvetica, Arial, sans-serif;
+}
 
 /* input form */
 #university-label {

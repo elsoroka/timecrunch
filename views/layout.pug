@@ -3,45 +3,51 @@ html(lang='en')
     head
         title= title
         meta(charset='utf-8')
-        meta(name='viewport', content='width=device-width, initial-scale=1')
+        meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
 
+        // Material Design for Bootstrap fonts and icons
+        link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons')
+        link(rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous")
         link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh", crossorigin="anonymous")
         link(rel='stylesheet', href='/stylesheets/style.css')
+        
+        // Font Awesome JS
+        script(defer='' src='https://use.fontawesome.com/releases/v5.0.13/js/solid.js' integrity='sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ' crossorigin='anonymous')
+        script(defer='' src='https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js' integrity='sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY' crossorigin='anonymous')
 
         script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
         script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous")
+        script(src='https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js' integrity='sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9' crossorigin='anonymous')
 
-        script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6", crossorigin="anonymous")
+        //script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6", crossorigin="anonymous")
         script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
         script(src='https://d3js.org/d3.v4.js')
     body
+        
 
         script(id="demographic-dropdowns-template" type="text/x-handlebars-template")
             include demographic-dropdowns-template.handlebars
         script(id="add-demographic-button-template" type="text/x-handlebars-template")
             include add-demographic-button-template.handlebars
 
-        div#schedule-form-container(class='d-flex flex-wrap')
-            div#user-input-form-container(class='p-3 flex-col')
-                div(id='input-form' class='flex-col')
-                    include input-form 
-                div(id='extra-error-div' class='container-fluid')
-                    block content
-            div(id='schedule-container' class='mr-auto w-1/2')
-                div(id='heatmap')
+        h2#timecrunch-title.p-1 timecrunch
+        div.container
+            div#schedule-form-container(class='d-flex flex-wrap')
+                div#user-input-form-container(class='p-3 flex-col')
+                    div(id='input-form' class='flex-col')
+                        include input-form 
+                    div(id='extra-error-div' class='container-fluid')
+                        block content
+                div(id='schedule-container' class='mr-auto w-1/2')
+                    div(id='heatmap')
         div(id='footer')
     - console.log(`layout.pug executing server side`)
     script
         .
             let server_data = !{JSON.stringify(server_data)};
-            /*
-            let weekdayNames = !{JSON.stringify(server_data.weekdayNames)};
-            let timeIncrements = !{JSON.stringify(server_data.timeIncrements)};
-            let hm = !{JSON.stringify(server_data.heatmap)};
-            console.log("please.." + !{JSON.stringify(server_data.heatmap)});
-            */
         include ../public/scripts/heatmap-d3.js
         include ../public/scripts/input-control.js
-
-    - //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
+    script.
+      $(document).ready(function() { $('body').bootstrapMaterialDesign(); });
+    //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
 
