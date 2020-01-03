@@ -152,14 +152,14 @@ function buildHeatmap(heatmapJson) {
     // Prepare the group elements for X and Y axes in the svg
     svg.append("g")
         .attr("id", "day-axis")
-        .style("font-size", 15)
+        .style("font-size", 22)
         .attr("transform", "translate(0," + 0 + ")")
         .classed("x axis", true)
         //.select(".domain").remove()
 
     svg.append("g")
         .attr("id", "time-axis")
-        .style("font-size", 15)
+        .style("font-size", 16)
         .attr("transform", "translate(0," + -24 + ")")
         .classed("y axis", true)
 
