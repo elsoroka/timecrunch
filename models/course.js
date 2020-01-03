@@ -24,7 +24,7 @@ const CourseSchema = new Schema(
     }]
 }, {timestamps:{}}); // option timestamps automatically adds createdAt and updatedAt fields
 
-
+/*
 //' XX:XX- XX:XXp' to [startMins, endMins] starting from midnight
 function minutesSinceMidnight(unformatted_time) {
 
@@ -107,6 +107,6 @@ CourseSchema.statics.parseSections = function(sections) {
         parsed_sections.push(parsed_section);
     });
     return parsed_sections;
-};
+};*/
 
 module.exports = mongoose.model('Course', CourseSchema);

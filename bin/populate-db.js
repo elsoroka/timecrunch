@@ -35,14 +35,16 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
     };
 
     //console.log(sections);
-    // create array of  parsed sections 
-    const parsed_sections = Course.parseSections(sections);
-    if (parsed_sections == null) {
-        return;
-    }
+    // create array of  parsed sections
+    // We don't need this anymore because the JSON file is already parsed. The parsing is moved to uci-scraper.js ~emi
+    // const parsed_sections = Course.parseSections(sections);
+    // if (parsed_sections == null) {
+    //     return;
+    // }
+
     // upsert is true which means it will find the course and update it or create a new course if not present
     // option "new" set to true means it will return the updated version instead of the original
-    Course.findOneAndUpdate(courseinfo, {sections: parsed_sections}, {new: true, upsert: true}, 
+    Course.findOneAndUpdate(courseinfo, {sections: sections}, {new: true, upsert: true}, 
         function (err, course) {
             if (err) {
                 cb(err, null);
