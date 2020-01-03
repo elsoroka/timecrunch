@@ -186,8 +186,9 @@ function buildHeatmap(heatmapJson) {
         //scaleSequential().interpolator(d3.interpolateInferno)
         .domain([0, Math.max(...[].concat(...hm))/2])
                 //d3.max(hm, function(d) {return d.count; })/2, d3.max(hm, function(d) {return d.count;})])
-        .range(["#FFFFDD", "#3E9583", "#1F2D86"]);
-
+        .range(["#CBEBF6", "#3E9583"]);
+    //.range(["#FFFFDD", "#3E9583", "#1F2D86"]);  //original colorscheme
+   
     // add the squares
     let allArr = svg.selectAll()
         .data(hm)//, function(d,i,j) {console.log(`d=${d},i=${i}`);return d})
