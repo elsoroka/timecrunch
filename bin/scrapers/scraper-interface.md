@@ -74,12 +74,17 @@ Application note: Finer divisions may be possible at some universities: for exam
 **Parameters:** none.
 **Returns:** The university name.
 
-**`[Course] = scraper.run(string term, string department, [string level])`**
+**`Promise -> [Course] = scraper.run(string term, string department, [string level])`**
 **Parameters:** `term` is a string from the list returned by `scraper.levels()`
 `department` is a string from the list returned by `scraper.departments()`
 optional `level` is from the list returned by `scraper.levels()`
-**Returns:** a list of Course objects.
+**Returns:** a Promise which resolves to a list of Course objects. These objects are not necessarily correctly formatted. scraper.process() should be called on them.
 **Example:** `courses = scraper.run("Fall 2019", "CS");`
+
+**`[Course] = scraper.process([Course])`**
+**Parameters:** The list of Course objects obtained by resolving the Promise from scraper.run.
+**Returns:** The Course objects in compliance with this specification and ready for database entry.
+**Example** `courses = scraper.process(courses);`
 
 
 ### Future implementation (additional features)

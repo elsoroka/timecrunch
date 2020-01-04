@@ -10,7 +10,7 @@ function departments() {
 }
 
 function levels() {
-	return ["Lower Div", "Upper Div", "Graduate"];
+	return ["LowerDiv", "UpperDiv", "Graduate"];
 }
 
 function name() {
@@ -21,17 +21,58 @@ function currentTerm() {
 	return "2020 Winter";
 }
 
-function run(options) {
-    return WebSocApi.callWebSocAPI(options);
+function process(courses, options) {
+    // Add the course level because we don't know it from the result
+    // we just have it from options
+    const level = options["division"];
+    courses.forEach( course => {
+            course = parseSections(course.sections);
+        });
+    return courses; // fix
 }
 
-function process(result) {
-    for (const key of Object.keys(result)) {        
-        result[key].map( function(course,i) {
-            result[key][i].sections = parseSections(course.sections);
+async function run(options) {
+        // Get a Promise
+        let result = WebSocApi.callWebSocAPI(options);
+        // Resolve the Promise
+        result = await result.then((json) => {
+
+            //final_res = { };
+            // TODO: I question this structure. options specifies ONE department
+            // and ONE level. So I think some of this nesting can be flattened.
+            // ~Emi
+            // for now, run is supposed to return a LIST of courses matching options
+            courses = [];
+            json["schools"].forEach(school => {
+                school["departments"].forEach(department => {
+                    department["courses"].forEach(course => {
+                        var sections = [];
+                        course["sections"].forEach(section => {
+                            let res = {"enrolled" : section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"],
+                            "meetings" : section["meetings"]}
+                            sections.push(res);
+                        });
+
+                        let res = {
+                            "courseNumber": course["courseNumber"],
+                            "courseTitle": course["courseTitle"],
+                            "sections": sections,
+                            "university": name(),
+                            "department":department["deptCode"],
+                        };
+                        courses.push(res);
+                    });
+                    /*if (final_res[department["deptCode"]]) {
+                        final_res[department["deptCode"]].push(...courses);
+                    } else {
+                        final_res[department["deptCode"]] = courses;
+                    }*/
+                });
+            });
+            // TODO: At this point we don't have the course division
+            return courses;
         });
-    }
-    return result; // fix
+        return process(result, options);
 }
 
 //' XX:XX- XX:XXp' to [startMins, endMins] starting from midnight
