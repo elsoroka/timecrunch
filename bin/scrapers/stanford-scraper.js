@@ -48,7 +48,7 @@ async function run(options) {
 	let courses = [];
 	let count=0; // temp: interrupt infinite loops
 
-    while ((count < 10) && ("" != url)) {
+    while ((count < 20) && ("" != url)) {
     	console.log("\nGetting URL, count:", url, count);
     	count += 1;
     	[newCourses, url] = await axios.get(url)
@@ -67,7 +67,6 @@ async function run(options) {
 			course.university = name();
 		});
 		courses = courses.concat(newCourses);
-
 		// Print neatly for debugging
 		/*
 		newCourses.map( function(course, _) {
@@ -236,7 +235,8 @@ function parseDescriptionString(descriptionString) {
 	let enrolled=0;
 	// Retrieve the enrolled count, which may be 0 but cannot be null or undefined.
 	[enrolled, _, newIndex] = getMatch(dataString, /Students\senrolled:\s(\d+)\s(\/ \d+)?/, 0);
-	
+	enrolled = parseInt(enrolled); // "Cannot fail" because it is always an integer.
+
 	dataString = dataString.slice(newIndex);
 
 	// Retrieve multiple meetings from the remainder of the string.
