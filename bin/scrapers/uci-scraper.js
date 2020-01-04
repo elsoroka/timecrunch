@@ -10,7 +10,7 @@ function departments() {
 }
 
 function levels() {
-	return ["Lower Div", "Upper Div", "Graduate"];
+	return ["LowerDiv", "UpperDiv", "Graduate"];
 }
 
 function name() {
@@ -42,7 +42,6 @@ async function run(options) {
             // and ONE level. So I think some of this nesting can be flattened.
             // ~Emi
             // for now, run is supposed to return a LIST of courses matching options
-            console.log("OPTIONS", options, "RESULT\n\n", JSON.stringify(json));
             courses = [];
             json["schools"].forEach(school => {
                 school["departments"].forEach(department => {

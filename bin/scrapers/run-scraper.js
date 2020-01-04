@@ -20,7 +20,7 @@ function runScraper(scraper) {
     depts.forEach((deptName, deptDelay) => {
         if (deptName != "") {
             levels.forEach((division, divDelay) => {
-                options = {
+                let options = {
                     term: term,
                     department: deptName,
                     division: division
