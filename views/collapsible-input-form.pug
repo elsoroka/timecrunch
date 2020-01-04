@@ -1,0 +1,39 @@
+  // Sidebar
+  nav#sidebar
+    .sidebar-header
+      h3 Bootstrap Sidebar
+      strong BS
+    ul.list-unstyled.components
+      li.active
+        a.dropdown-toggle(href='#homeSubmenu' data-toggle='collapse' aria-expanded='false')
+          i.fas.fa-home
+          |                     Home
+        ul#homeSubmenu.collapse.list-unstyled
+          li
+            a(href='#') Home 1
+          li
+            a(href='#') Home 2
+          li
+            a(href='#') Home 3
+      li
+        a(href='#')
+          i.fas.fa-briefcase
+          |                     About
+        a.dropdown-toggle(href='#pageSubmenu' data-toggle='collapse' aria-expanded='false')
+          i.fas.fa-copy
+          |                     Pages
+        ul#pageSubmenu.collapse.list-unstyled
+          li
+            a(href='#') Page 1
+          li
+            a(href='#') Page 2
+          li
+            a(href='#') Page 3
+  // Page Content
+  #content
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light
+      .container-fluid
+        button#sidebarCollapse.btn.btn-info(type='button')
+          i.fas.fa-align-left
+          span Toggle Sidebar
+

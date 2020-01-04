@@ -1,5 +1,4 @@
 /* interface controller */
-// TODO: extend to handle multiple universities
 const Course = require('../models/course')
 const University = require('../models/university')
 const GenericHeatmap = require('./generic-heatmap')
@@ -97,12 +96,12 @@ const executeQuery = (req, res, next) => {
     // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
     let for_university = { university: req.body.university }; 
     // Build the query to get all courses 
-    let course_query = Course.find().or(union_of_conditions).orFail();//new Error("No courses found")); 
+    let course_query = Course.find().or(union_of_conditions);//.orFail();//new Error("No courses found")); 
     // Run the query, exec returns a Promise
     course_query.exec( function(err, courses) {
         if (err) return next(err); // TODO: catch and handle error: "No courses found" 
 
-        if (!courses) {
+        if (courses === null || courses === []) {
             res.locals.heatmap_object = GenericHeatmap.getEmptyHeatmapJson();
             next()
         }

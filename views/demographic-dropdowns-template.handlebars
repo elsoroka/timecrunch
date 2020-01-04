@@ -1,10 +1,12 @@
 <!-- This looks like an HTML file but HandlebarsJS requires this HTML-like syntax -->
 <!-- This will be rendered by the browser via handlebars -->
-<div class="demographic-row d-flex">
+<div class="demographic-row">
     <div id={{departmentId}}>
         <div class='d-flex p-1'>
             <div class='text-center'>
+                {{#unless departmentId}}
                 <label class='align-self-center' for="departmentSelection">Department:</label>
+                {{/unless}}
                 <select class='demographic-selection department-selection form-control align-self-center'>
                 </select>
             </div>
@@ -14,7 +16,9 @@
     <div id={{divisionId}}>
         <div class='d-flex p-1'>
             <div class='text-center'>
+                {{#unless divisionId}}
                 <label class='align-self-center' for="divisionSelection">Division:</label>
+                {{/unless}}
                 <select class='demographic-selection division-selection form-control align-self-center'>
                 </select>
             </div>

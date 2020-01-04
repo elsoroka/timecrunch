@@ -7,21 +7,22 @@ html(lang='en')
 
         // Material Design for Bootstrap fonts and icons
         link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons')
+        // Custom Material Design Select
+        link(href='https://cdn.rawgit.com/djibe/bootstrap-select/v1.13.0-dev/dist/css/bootstrap-select-daemonite.min.css' rel='stylesheet')
+        // Material Design for Bootstrap 
         link(rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous")
-        link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh", crossorigin="anonymous")
+        // Boostrap -- consider removing
+        //link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh", crossorigin="anonymous")
+        // timecrunch custom stylesheet
         link(rel='stylesheet', href='/stylesheets/style.css')
-        
+        // Scrollbar Custom CSS
+        link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css')
+  
         // Font Awesome JS
         script(defer='' src='https://use.fontawesome.com/releases/v5.0.13/js/solid.js' integrity='sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ' crossorigin='anonymous')
         script(defer='' src='https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js' integrity='sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY' crossorigin='anonymous')
 
-        script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
-        script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous")
-        script(src='https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js' integrity='sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9' crossorigin='anonymous')
-
         //script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6", crossorigin="anonymous")
-        script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
-        script(src='https://d3js.org/d3.v4.js')
     body
         
 
@@ -30,24 +31,58 @@ html(lang='en')
         script(id="add-demographic-button-template" type="text/x-handlebars-template")
             include add-demographic-button-template.handlebars
 
-        h2#timecrunch-title.p-1 timecrunch
-        div.container
-            div#schedule-form-container(class='d-flex flex-wrap')
-                div#user-input-form-container(class='p-3 flex-col')
-                    div(id='input-form' class='flex-col')
+        div.wrapper
+            nav#input-form-sidebar
+                div.sidebar-header
+                    h4.align-text-left Demographics
+                    strong D
+                        
+                div#input-form-container.collapsible
+                    div#input-form
                         include input-form 
                     div(id='extra-error-div' class='container-fluid')
                         block content
-                div(id='schedule-container' class='mr-auto w-1/2')
-                    div(id='heatmap')
+            div#schedule-container.container-fluid
+                div.d-flex.justify-content-start
+                    button#input-form-collapse-button.navbar-btn(type="button")
+                        span 
+                        span 
+                        span 
+                    div.d-flex.justify-content-center 
+                        h2#timecrunch-title.p-3 timecrunch
+                div(id='heatmap')
         div(id='footer')
     - console.log(`layout.pug executing server side`)
+
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous")
+    script(src='https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js' integrity='sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9' crossorigin='anonymous')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js")
+    script(src='https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js')
+    script(src='https://d3js.org/d3.v4.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js')
     script
         .
             let server_data = !{JSON.stringify(server_data)};
         include ../public/scripts/heatmap-d3.js
         include ../public/scripts/input-control.js
     script.
-      $(document).ready(function() { $('body').bootstrapMaterialDesign(); });
+        $(document).ready(function() { 
+            $('body').bootstrapMaterialDesign(); 
+            $('#input-form-sidebar').mCustomScrollbar({
+                theme: "minimal"
+            });
+            $('#input-form-collapse-button').on('click', function () {
+                // open/close input-form
+                $('#input-form-sidebar').toggleClass('collapsible');
+                $('#input-form').toggleClass('collapsible');
+                $(this).toggleClass('collapsible');
+                // close dropdowns
+                $('.collapse.in').toggleClass('in');
+                // and also adjust aria-expanded attributes we use for the open/closed arrows
+                // in our CSS
+                $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+            });
+        });
     //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
 

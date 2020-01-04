@@ -8,9 +8,6 @@ $( function() {
      * */
     
 
-    Handlebars.registerHelper('var',function(name, value, context){
-      this[name] = value;
-    });
 
     // Globals
     let finishedArr = [];
@@ -18,8 +15,8 @@ $( function() {
     let departmentDropdownId = 0;
     let divisionDropdownId = 0;  
     let currentRow = 0;
-    let departmentList = ['--Select Department--'];
-    let divisionList = ['--Select Division--'];
+    let departmentList = ['Any Department'];
+    let divisionList = ['Any Course Level'];
     let selectedUniversityName = undefined;
     let demographicRowId = 0;
 
@@ -86,11 +83,6 @@ $( function() {
         $('#demographics-rows-group').append(demogButtons());
     });
 
-    function finish() {
-        console.log(finishedArr);
-    }
-
-
 
     function makeDemographicObject(selectorStr, demList, forStr, innerHtmlString, classStr, idStr, nameStr){
         return {
@@ -124,7 +116,42 @@ $( function() {
      * School Select Event Listener
      * When the user selects a school from the drop down box
      */
+    let isDropdownOpen = 0;
+    $("#school-drop-down").on('show.bs.select', function() {
+        console.log($(this));
+		let universitySelect = $(this);
+		let dropdownMenu = universitySelect.find(".dropdown-menu")
+		console.log(dropdownMenu);
+		dropdownMenu = dropdownMenu[0];
+        console.log(`isdropdownopne = ${isDropdownOpen}`);
+        ++isDropdownOpen;
+        console.log(`isdropdownopne = ${isDropdownOpen}`);
+        if (isDropdownOpen == 1) {
+			$('#schedule-container').append(dropdownMenu);
+			/*
+			var eOffset = 500;
+			dropdownMenu.css({
+				'display': 'block',
+				'top': eOffset,
+				'left': eOffset
+			});
+            $("#schedule-container").append($('#school-drop-down').css({
+                position: 'absolute',
+                left: $('#school-drop-down').offset().left,
+                top: $('#school-drop-down').offset().top
+            }).detach());
+			*/
+            isDropdownOpen = -1;
+			console.log(`isdropdownopne = ${isDropdownOpen}`);
+        }
+	});
     $("#school-drop-down").change( function() {
+		let loadSortedDemographicsList = (dl, rl) => {
+			let placeholder = [dl[0]];
+			dl = Array.from(new Set([...rl])); // original demographicsList, newly populated results list 
+			dl.sort();
+			return Array.from(placeholder.concat(dl));
+		};
         console.log(`hello from school select event listener`);
         console.log($(this));
         console.log($(this)[0].selectedIndex);
@@ -140,24 +167,28 @@ $( function() {
                     let deptsNameLabel = "dept_names", divsNameLabel = "division_names";
                     let demographics = [];//new Array(2)
 
-                    // load university's departments as list
-                    departmentList = new Set([...departmentList, ...res.departments]) // remember these corresponding school departments
-                    divisionList = new Set([...divisionList, ...res.divisions]) // remember these corresponding school divisions
+					
+                    // load demographics from server
+					departmentList = loadSortedDemographicsList(departmentList, res.departments);
+					divisionList = Array.from(new Set([...divisionList, ...res.divisions]));
+					
 
                     // add first row of buttons -- when school choice is selected
                     $('#demographics-rows-group').append(demogButtons());
-
-                    // TODO: send the id of the group (first argument below) from pug programmatically, they correspond to input-form.pug
+					$('#demographics-rows-group button').trigger("click");
 
                 });
+				// show demographics prompt:
+				$('.input-form-title').toggleClass("school-is-selected");
+
             }
         }
         $("#school-drop-down").blur();
     });
 
-    ///////////////////////////
-    /* Demographic Selection */
-    //////////////////////////
+    /*---------------------------
+     * Demographic Selection 
+     * --------------------------*/
     // Initialize school selection to placeholder
     $("#school-drop-down").attr( "selectedIndex", 0 );
     /*
@@ -166,9 +197,9 @@ $( function() {
      */
     //$("#school-drop-down").change( function() {
     
-    /////////////////////////
-    /* Submit Demographics */
-    /////////////////////////
+    /*---------------------------
+     * Submit Demographics 
+     * --------------------------*/
 
     function getSelectedUniversity(){
         if (selectedUniversityName === undefined)
@@ -178,7 +209,7 @@ $( function() {
 
     // warning: not using this right now using the more general version below 
     // but TODO: allow for things like lower MATH + upper ARABIC  etc.
-    function getSelectedDemographic(thisRow, selectorStr, placeholder = "--Select ") {
+    function getSelectedDemographic(thisRow, selectorStr, placeholder = "Any ") {
         let demRow = [] 
         $.each(thisRow.find(selectorStr), function(_, option) {
             if (!option.text.startsWith(placeholder))

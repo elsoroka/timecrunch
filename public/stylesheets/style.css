@@ -1,19 +1,256 @@
 /* Page-Wide Defaults */
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+
 body {
-  padding: 0px;
-  /*
-   * font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-   */
+    font-family: 'Poppins', sans-serif;
+    background: #fafafa;
 }
 
-a {
-  color: #00B7FF;
+p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    font-weight: 300;
+    line-height: 1.7em;
+    color: #999;
 }
 
-/* END Page-Wide Defaults */
+a, a:hover, a:focus {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+/*
+ * Sidebar Collapse Toggle Button
+.navbar-btn {
+    box-shadow: none;
+    outline: none !important;
+    border: none;
+}
+ */
+
+i,
+span {
+    display: inline-block;
+}
+
+span.bmd-form-group, span.is-filled {
+	padding-top: 0px;
+	padding-left: 7px;
+}
+
+.wrapper {
+    display: flex;
+    perspective: 1500px;
+    align-items: stretch;
+	width: 100%;
+	height: 100%;
+}
+
+
+/* Input form side-bar */
+#input-form-sidebar {
+    min-width: 280px;
+    max-width: 350px;
+    //min-height: 100vh;
+    //width: 250px;
+
+    //height: 20%;
+	height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    background: #7386D5;
+    color: #fff;
+    transition: all 0.5s cubic-bezier(0.945, 0.020, 0.270, 0.665);
+    transform-origin: left; /* Set the transformed position of sidebar to center left side. */
+}
+
+#input-form label {
+	margin-left: 5px;
+}
+
+#input-form select {
+    z-index: 999;
+}
+
+#input-form-sidebar.collapsible{
+    transform: rotateY(1deg);
+    min-width: 10px;
+    max-width: 80px;
+    text-align: center;
+}
+
+#input-form-sidebar.collapsible .sidebar-header h4, 
+#input-form-sidebar.collapsible .sidebar-header .CTAs,
+#input-form.collapsible label,
+#input-form.collapsible h6 {
+    display: none;
+}
+
+#input-form-sidebar.collapsible .sidebar-header strong {
+    display: block;
+}
+
+#input-form-sidebar .sidebar-header {
+    padding: 20px;
+    background: #6d7fcc;
+}
+
+#input-form-sidebar .sidebar-header strong {
+    display: none;
+    font-size: 1.8em;
+}
+
+
+#input-form-sidebar .sidebar-header {
+    padding: 10px;
+    background: #6d7fcc;
+}
+
+
+#input-form-container {
+	position: relative
+}
+#university-select {
+	display: inline-block;
+	position: relative
+}
+
+#select-school-dropdown {
+	position: absolute
+	z-index: 999;
+	top: 0;
+	left: 0;
+}
+
+#dropdown-menu show {
+	position: absolute
+	z-index: 999;
+	top: 0;
+	left: 0;
+}
+
+@media (max-width: 768px) {
+    /* Reversing the behavior of the sidebar: 
+       it'll be rotated vertically and off canvas by default, 
+       collapsing in on toggle button click with removal of 
+       the vertical rotation.   */
+    #input-form-sidebar {
+        margin-left: -250px;
+        transform: rotateY(100deg);
+    }
+    #input-form-sidebar.collapsible {
+        margin-left: 0;
+        transform: none;
+    }
+
+    /* Reversing the behavior of the bars: 
+       Removing the rotation from the first,
+       last bars and reappear the second bar on default state, 
+       and giving them a vertical margin */
+    #input-form-collapse-button span:first-of-type, span:nth-of-type(2), span:last-of-type {
+        transform: none;
+        opacity: 1;
+        margin: 5px auto;
+    }
+
+    /* Removing the vertical margin and make the first and last bars rotate again when the sidebar is open, hiding the second bar */
+    #input-form-collapse-button.collapsible span {
+        margin: 0 auto;
+    }
+    #input-form-collapse-button.collapsible span:first-of-type {
+        transform: rotate(45deg) translate(2px, 2px);
+    }
+    #input-form-collapse-button.collapsible span:nth-of-type(2) {
+        opacity: 0;
+    }
+    #input-form-collapse-button.collapsible span:last-of-type {
+        transform: rotate(-45deg) translate(1px, -1px);
+    }
+}
+
+
+
+@media (max-width: 768px) {
+    #input-form-sidebar {
+        margin-left: -350px;
+    }
+    #input-form-sidebar.active {
+        margin-left: 0;
+    }
+}
+
+#input-form-collapse-button {
+    width: 40px;
+    height: 40px;
+    background: #f5f5f5;
+}
+
+#input-form-collapse-button span {
+    width: 80%;
+    height: 2px;
+    //margin: 0px 1px 1px 1px;
+    margin: 0 auto;
+    display: block;
+    background: #555;
+    transition: all 0.8s cubic-bezier(0.810, -0.330, 0.345, 1.375);
+}
+
+#input-form-collapse-button span:first-of-type {
+    /* rotate first one */
+    transform: rotate(45deg) translate(2px, 2px);
+}
+#input-form-collapse-button span:nth-of-type(2) {
+    /* second one is not visible */
+    opacity: 0;
+}
+
+#input-form-collapse-button span:last-of-type {
+    /* rotate third one */
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+#input-form-collapse-button.collapsible span {
+    /* no rotation */
+    transform: none;
+    /* all bars are visible */
+    opacity: 1;
+    margin: 4px auto;
+}
+
+.input-form-title {
+	display: none;
+}
+
+.input-form-title.school-is-selected {
+	display: inline;
+}
+
+// end input form sidebar
+
+
+/* ----------------------- 
+ * SCHEDULE HEATMAP STYLE
+ * -----------------------
+ * /
+
+#schedule-container {
+    height: 100vh;
+	min-height: 800px;
+	max-height: 800px;
+    padding: 0px;
+    transition: all 0.3s;
+}
 
 #timecrunch-title {
     font-family: Roboto, "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+#heatmap {
+	min-height: 200vh
+	max-height: 200vh
 }
 
 /* input form */
@@ -22,19 +259,20 @@ a {
 }
 
 button {
-  background: lightgrey;
-  padding:10px
+  background: pink;
+  padding: 10px
 }
 
-.add-demog-btn {
-    background: lightblue;
+
+.btn, .btn-primary, .add-demog-button {
+    background: grey;
+	background-color: black;
+	color: lightgrey;
+	//#000000;
+	opacity: 50%;
     border-radius: 2em;
 }
 
-.hidden-buttons {
-  margin-top: 1em;
-  display: none;
-}
 
 /*
 .flex-box {
@@ -44,17 +282,7 @@ button {
 */
 /* END input form */
 
-/* TODO: make the schedule-form wrap on small screens */
-#schedule-form-container { 
-    height: 100%;
-    width: 100%;
-    display: flex;
-}
 /*
-#schedule-container {
-    width: 50%;
-}
-
 #user-input-form-container {
     width: 50%;
 }
