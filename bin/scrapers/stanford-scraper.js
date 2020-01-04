@@ -8,7 +8,7 @@ const path = require("path");
 // testing code, please remove
 //run({term:"Winter 2020", "department":"AA", "division":"Graduate"});
 //console.log("\n\n");
-run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
+//run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
 
 /*    EXPORTED FUNCTIONS FOR run-scraper.js    */
 

@@ -21,7 +21,7 @@ function currentTerm() {
 	return "2020 Winter";
 }
 
-function run(options) {
+function getPromise(options) {
     return WebSocApi.callWebSocAPI(options);
 }
 
@@ -32,6 +32,43 @@ function process(result) {
         });
     }
     return result; // fix
+}
+
+async function run(options) {
+        let result = getPromise(options);
+        result = await result.then((json) => {
+            final_res = { };
+
+            json["schools"].forEach(school => {
+                school["departments"].forEach(department => {
+                    courses = [];
+                    department["courses"].forEach(course => {
+                        var sections = [];
+                        course["sections"].forEach(section => {
+                            tmp_section = section["meetings"];
+                            tmp_section["enrolled"] = section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"];
+                            let res = {"enrolled" : section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"],
+                            "meetings" : section["meetings"]}
+                            sections.push(res);
+                        });
+
+                        let res = {
+                            "courseNumber": course["courseNumber"],
+                            "courseTitle": course["courseTitle"],
+                            "sections": sections
+                        };
+                        courses.push(res);
+                    });
+                    if (final_res[department["deptCode"]]) {
+                        final_res[department["deptCode"]].push(...courses);
+                    } else {
+                        final_res[department["deptCode"]] = courses;
+                    }
+                });
+            });
+            return final_res;
+        });
+        return process(result);
 }
 
 //' XX:XX- XX:XXp' to [startMins, endMins] starting from midnight

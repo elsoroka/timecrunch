@@ -1,9 +1,10 @@
 const fs   = require("fs");
 const path = require("path");
 const UciScraper = require("./uci-scraper.js")
+const StanfordScraper = require('./stanford-scraper.js')
 
 var finalJson = {};
-runScraper(UciScraper);
+runScraper(StanfordScraper);
 
 // OK so I decoupled UciScraper from runScraper and it works
 // But I don't know how to handle "any" scraper which implements the interface.
@@ -31,18 +32,19 @@ function runScraper(scraper) {
 }
 
 function cb(scraper, options) {
-    return () => callScraper(scraper, options).then(json => {
-
-        // Parsing happens here now.
-        json = scraper.process(json);
+    return () => scraper.run(options).then(json => {
 
         let fileName = "final.json";
         for (let [key, value] of Object.entries(json)) {
             level = options["division"];
             finalJson[level][key] = value;
         }
-
-        fs.writeFile(path.resolve(__dirname, '..', 'university-data', scraper.name(), fileName), JSON.stringify(finalJson), err => {
+        // If the filepath doesn't exist, create it
+        const directory = path.resolve(__dirname, '..', 'university-data', scraper.name());
+        if (!fs.existsSync(directory)){
+            fs.mkdirSync(directory);
+        }
+        fs.writeFile(path.resolve(directory, fileName), JSON.stringify(finalJson), err => {
             if (err) {
                 console.log(err, finalJson);
                 console.log(options["division"], options["department"], "not ok");
@@ -53,7 +55,7 @@ function cb(scraper, options) {
         });
     });
 }
-
+/*
 function callScraper(scraper, options) {
     return new Promise( resolve => {
         const result = scraper.run(options);
@@ -92,3 +94,4 @@ function callScraper(scraper, options) {
         });
     });
 }
+*/
