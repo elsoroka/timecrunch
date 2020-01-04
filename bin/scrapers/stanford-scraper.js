@@ -6,9 +6,9 @@ const fs = require("fs");
 const path = require("path");
 
 // testing code, please remove
-//run({term:"Winter 2020", "department":"AA", "division":"Graduate"});
+//run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
 //console.log("\n\n");
-//run({term:"Summer 2020", "department":"EE", "division":"Graduate"});
+//run({term:"2020 Summer", "department":"EE", "division":"Graduate"});
 
 /*    EXPORTED FUNCTIONS FOR run-scraper.js    */
 
@@ -44,7 +44,6 @@ async function run(options) {
 	// let url = "https://explorecourses.stanford.edu/search?q=AA&view=timeschedule&filter-term-Winter=on&academicYear=&filter-catalognumber-AA=on&page=0&filter-coursestatus-Active=on&collapse="
 	// Small testcase URL, 3 results
 	//const url = "https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=CS229&collapse=%2C6%2C7%2C"
-	
 	let [url, term] = makeUrlAndTermFromOptions(options);
 	let courses = [];
 	let count=0; // temp: interrupt infinite loops
@@ -109,9 +108,8 @@ function makeUrlAndTermFromOptions(options) {
 	/* Assumption: term is of the form "Quarter Year"
 	 * for example: "Winter 2020", "Fall 2019", etc.
 	 */
-	const [quarter, tmpYear] = options.term.split(' ');
+	const [tmpYear, quarter] = options.term.split(' ');
 	const year = parseInt(tmpYear);
-
 	let startYear="", endYear="";
 	// "Autumn 2019" belongs to the academicYear "2019-2020"
 	// "Winter 2020", "Spring 2020" and "Summer 2020" are in the year "2019-2020"
