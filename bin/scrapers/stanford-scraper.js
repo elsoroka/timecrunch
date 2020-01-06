@@ -1,9 +1,11 @@
 // HTML web scraper for explorecourses.stanford.edu
+'use strict'; // ban god damn global variables
 
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require("fs");
 const path = require("path");
+var _ = "";
 
 // testing code, please remove
 //run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
@@ -45,7 +47,7 @@ async function run(options) {
 	// Small testcase URL, 3 results
 	//const url = "https://explorecourses.stanford.edu/search?view=catalog&filter-coursestatus-Active=on&page=0&catalog=&academicYear=&q=CS229&collapse=%2C6%2C7%2C"
 	let [url, term] = makeUrlAndTermFromOptions(options);
-	let courses = [];
+	let courses = [], newCourses = [];
 	let count=0; // temp: interrupt infinite loops
 
     while ((count < 20) && ("" != url)) {
@@ -79,7 +81,7 @@ async function run(options) {
 		});*/
 		// If we have another URL to fetch, wait 1/2 second.
 		if ("" != url) {
-			await wait(500);
+			await wait(1000);
 		}
     }
     // console.log("Returning", courses.length, "courses");
@@ -133,7 +135,7 @@ function wait(ms, value) {
 
 function getData(response, term) {
 	const $ = cheerio.load(response.data);
-	courses = [];
+	let courses = [];
 
 	// Find all the searchResult divs, which contain 1 class listing each.
 	$('div[class^="searchResult"]').each(function(i, course) {
@@ -178,7 +180,6 @@ function getData(response, term) {
 
 	// Find the next page if it exists, otherwise use ""
 	let nextLink = "";
-	links = {};
 	// There are several links on each page. It's easiest to choose the "next" page.
 	const linkResult = $('#pagination > a:contains("next")').attr('href');
 	if (undefined != linkResult) {
@@ -198,7 +199,7 @@ Grading: Letter or Credit/No Credit | LEC | Students enrolled: 23
 */
 function parseDescriptionString(descriptionString) {
 	// Split by "|"
-	substrings = descriptionString.split('|').map((item, _) =>
+	let substrings = descriptionString.split('|').map((item, _) =>
 		item.trim()); // Remove stray whitespace
 	/* Assumption:
 	 * The first substring is course name
@@ -232,7 +233,7 @@ function parseDescriptionString(descriptionString) {
 	 */
 	// Retrieve the enrollment count
 	let dataString = substrings[index];
-	let enrolled=0;
+	let enrolled=0, newIndex=0;
 	// Retrieve the enrolled count, which may be 0 but cannot be null or undefined.
 	[enrolled, _, newIndex] = getMatch(dataString, /Students\senrolled:\s(\d+)\s(\/ \d+)?/, 0);
 	enrolled = parseInt(enrolled); // "Cannot fail" because it is always an integer.
@@ -268,6 +269,7 @@ function parseScheduleString(dataString) {
 	// Declaring some variables...
 	let startTime=0, endTime=0;
 	let startEndDate="";
+	let newIndex = 0, matchIndex = 0;
 	
 	// Retrieve the quarter start/end date
 	[startEndDate, _, newIndex] = getMatch(dataString, /(\d\d\/\d\d\/\d{4}\s-\s\d\d\/\d\d\/\d{4})/, "");
@@ -298,7 +300,7 @@ function parseScheduleString(dataString) {
 	endTime   = parseTime(endTime);
 
 	// Find the days in the piece we saved (returns [] if none found)
-	days = parseDays(dayString);
+	const days = parseDays(dayString);
 
 	// Couldn't find times/days, this is OK because it happens at the end of the string.
 	if ((null == startTime) || (null == endTime) || (0 == days.length)) {
@@ -355,7 +357,7 @@ function getMatch(textStr, pattern, returnOnNoMatch) {
  * This function finds ALL the days in the string.
  */
 function parseDays(dataString) {
-	let result = null, days = [];
+	let result = null, days = [], newIndex = 0;
 	do {
 		// Map days of week to indices
 		const dayMap = {"Mon":0, "Tue":1, "Wed":2, "Thu":3, "Fri":4, "Sat":5, "Sun":6};
@@ -378,7 +380,7 @@ function parseTime(timeString) {
 		return null;
 	}
 	// The first group is the hours, the second is minutes, the third is A or P
-	result = timeString.match(/(\d{1,2}):(\d{2})\s?(A|P)M/);
+	const result = timeString.match(/(\d{1,2}):(\d{2})\s?(A|P)M/);
 	if ((null != result) && (4 == result.length)) {
 		return parseInt(result[1])*60 + parseInt(result[2]) + (("P" === result[3]) ? 12*60 : 0);
 	}
