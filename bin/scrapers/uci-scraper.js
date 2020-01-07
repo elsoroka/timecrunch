@@ -17,6 +17,13 @@ function name() {
 	return "UC Irvine";
 }
 
+// lower-case, no spaces special characters
+// this can be used to form a filename, for example	
+// -max
+function formattedName() {
+	return "uci";
+}
+
 function currentTerm() {
 	return "2020 Winter";
 }
@@ -24,11 +31,35 @@ function currentTerm() {
 function process(courses, options) {
     // Add the course level because we don't know it from the result
     // we just have it from options
-    const level = options["division"];
-    courses.forEach( course => {
-            course = parseSections(course.sections);
-        });
+    const courseLevel = options["division"];
+    courses.forEach(course => {
+        course = parseSections(course.sections);
+    });
     return courses; // fix
+}
+
+function scrapeCourse(course, courses) {
+    let sections = [];
+    course["sections"].forEach(section => {
+        scrapeSection(section, sections);
+    });// side-effect: "sections" array is full
+    courses.push({
+        "courseNumber": course["courseNumber"],
+        "courseTitle": course["courseTitle"],
+        "sections": sections,
+        "university": name(),
+        "department":department["deptCode"],
+    });
+}
+
+
+function scrapeSection(section, sections) {
+    sections.push({
+    "enrolled" : section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" 
+        ? section["numCurrentlyEnrolled"]["totalEnrolled"] 
+        : section["numCurrentlyEnrolled"]["sectionEnrolled"],
+    "meetings" : section["meetings"]
+    });
 }
 
 async function run(options) {
@@ -46,21 +77,7 @@ async function run(options) {
             json["schools"].forEach(school => {
                 school["departments"].forEach(department => {
                     department["courses"].forEach(course => {
-                        var sections = [];
-                        course["sections"].forEach(section => {
-                            let res = {"enrolled" : section["numCurrentlyEnrolled"]["sectionEnrolled"] == "" ? section["numCurrentlyEnrolled"]["totalEnrolled"] : section["numCurrentlyEnrolled"]["sectionEnrolled"],
-                            "meetings" : section["meetings"]}
-                            sections.push(res);
-                        });
-
-                        let res = {
-                            "courseNumber": course["courseNumber"],
-                            "courseTitle": course["courseTitle"],
-                            "sections": sections,
-                            "university": name(),
-                            "department":department["deptCode"],
-                        };
-                        courses.push(res);
+                        scrapeCourse(course, courses);
                     });
                     /*if (final_res[department["deptCode"]]) {
                         final_res[department["deptCode"]].push(...courses);
@@ -108,6 +125,7 @@ function minutesSinceMidnight(unformatted_time) {
 };
 
 function convertDaysToIntArray(days_string) {
+    //  Saturday and Sunday may need to be changed, havent seen the actual values to look for
     const days_re = /[MWF]|Tu|Th|Sa|Su/g;
     const dayDict = {"M": 0, "Tu": 1, "W": 2, "Th": 3, "F": 4, "Sa": 5, "Su": 6}
     let dayInts = [] 

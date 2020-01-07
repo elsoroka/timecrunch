@@ -8,7 +8,7 @@ const path = require("path");
 var _ = "";
 
 // testing code, please remove
-//run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
+run({term:"2020 Winter", "department":"EDUC", "division":"Graduate"});
 //console.log("\n\n");
 //run({term:"2020 Summer", "department":"EE", "division":"Graduate"});
 
@@ -28,7 +28,6 @@ function levels() {
 function name() {
 	return "Stanford University";
 }
-
 // TODO: FIX THIS
 function currentTerm() {
 	return "2020 Winter";
@@ -158,7 +157,7 @@ function getData(response, term) {
 			let section = parseDescriptionString($(this).text());
 			if (null != section) {
 				// Fix the building in the meeting object
-				section.meetings.map( (meeting, _) => meeting.bldg = location );
+				section.meetings.map((meeting, _) => meeting.bldg = location );
 				sections.push(section);
 			}
 		});
@@ -213,12 +212,12 @@ function parseDescriptionString(descriptionString) {
 	let courseType = "";
 	do {
 		courseType = getCourseType(substrings[index].slice(0,3));
-		index += 1;
 		// If we go out of bounds, this may be a failure
 		if (substrings.length < index) {
 			console.log("Parser FAILED! Couldn't find course type in:", substrings);
 			return null;
 		}
+		index += 1;
 	} while ("" == courseType);
 	// In some cases, the course type and description are not separated by |
 	// This means the course type is the last substring.
@@ -233,7 +232,7 @@ function parseDescriptionString(descriptionString) {
 	 */
 	// Retrieve the enrollment count
 	let dataString = substrings[index];
-	let enrolled=0, newIndex=0;
+	let enrolled = 0, newIndex = 0;
 	// Retrieve the enrolled count, which may be 0 but cannot be null or undefined.
 	[enrolled, _, newIndex] = getMatch(dataString, /Students\senrolled:\s(\d+)\s(\/ \d+)?/, 0);
 	enrolled = parseInt(enrolled); // "Cannot fail" because it is always an integer.
