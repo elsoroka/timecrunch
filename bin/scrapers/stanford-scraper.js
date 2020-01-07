@@ -8,7 +8,7 @@ const path = require("path");
 var _ = "";
 
 // testing code, please remove
-//run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
+run({term:"2020 Winter", "department":"EDUC", "division":"Graduate"});
 //console.log("\n\n");
 //run({term:"2020 Summer", "department":"EE", "division":"Graduate"});
 
@@ -213,12 +213,12 @@ function parseDescriptionString(descriptionString) {
 	let courseType = "";
 	do {
 		courseType = getCourseType(substrings[index].slice(0,3));
-		index += 1;
 		// If we go out of bounds, this may be a failure
 		if (substrings.length < index) {
 			console.log("Parser FAILED! Couldn't find course type in:", substrings);
 			return null;
 		}
+		index += 1;
 	} while ("" == courseType);
 	// In some cases, the course type and description are not separated by |
 	// This means the course type is the last substring.
@@ -324,7 +324,8 @@ function parseScheduleString(dataString) {
 function getCourseType(courseTypeStr) {
 	const courseTypes = ["LEC", "SEM", "DIS", "LAB", "LBS", "ACT",
 	"CAS", "COL", "WKS", "INS", "IDS", "ISF", "ISS", "ITR", "API",
-	"LNG", "CLK", "PRA", "PRC", "RES", "SCS", "T/D"];
+	"LNG", "CLK", "PRA", "PRC", "RES", "SCS", "T/D", "CLN", "RSC",
+	"TUT", "SIM"];
 	if (courseTypes.includes(courseTypeStr)) {
 		return courseTypeStr;
 	}
