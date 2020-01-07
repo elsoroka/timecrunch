@@ -8,7 +8,7 @@ const path = require("path");
 var _ = "";
 
 // testing code, please remove
-run({term:"2020 Winter", "department":"EDUC", "division":"Graduate"});
+//run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
 //console.log("\n\n");
 //run({term:"2020 Summer", "department":"EE", "division":"Graduate"});
 
@@ -28,6 +28,7 @@ function levels() {
 function name() {
 	return "Stanford University";
 }
+
 // TODO: FIX THIS
 function currentTerm() {
 	return "2020 Winter";
@@ -157,7 +158,7 @@ function getData(response, term) {
 			let section = parseDescriptionString($(this).text());
 			if (null != section) {
 				// Fix the building in the meeting object
-				section.meetings.map((meeting, _) => meeting.bldg = location );
+				section.meetings.map( (meeting, _) => meeting.bldg = location );
 				sections.push(section);
 			}
 		});
@@ -196,43 +197,29 @@ CEE 107A | 3-5 units | UG Reqs: GER:DB-EngrAppSci, WAY-SI | Class # 7814 | Secti
 Grading: Letter or Credit/No Credit | LEC | Students enrolled: 23
 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115
 */
-function parseDescriptionString(descriptionString) {
-	// Split by "|"
-	let substrings = descriptionString.split('|').map((item, _) =>
-		item.trim()); // Remove stray whitespace
-	/* Assumption:
-	 * The first substring is course name
-	 * We already know the name and don't care about the count.
-	 * The class #, section #, and grading option must appear (3 more substrings)
-	 * Other sections such as unit count UG Reqs may be interspersed, but this is not guaranteed.
-	 * We can safely skip at least 4 substrings and scan for the course type (LEC, DIS, LAB...)
+function parseDescriptionString(dataString) {
+	/* We would like to look for a courseType
+	 * We don't know exactly where it is
+	 * Split the string into substrings at "|"
+	 * We believe courseType will be the beginning of one of the substrings.
+	 * If we don't find it, we'll use "".
 	 */
-	let index = 4;
-	// Find the course type; it should be the first 3 characters
+	let substrings = dataString.split('|').map((item, _) =>
+		item.trim());
+	// I know this can be done with filter and I don't know how. Sorry. ~emi
 	let courseType = "";
-	do {
-		courseType = getCourseType(substrings[index].slice(0,3));
-		// If we go out of bounds, this may be a failure
-		if (substrings.length < index) {
-			console.log("Parser FAILED! Couldn't find course type in:", substrings);
-			return null;
+	for (let i=0; i<substrings.length; ++i) {
+		courseType = getCourseType(substrings[i]);
+		// Did we find it?
+		if ("" != courseType) {
+			break;
 		}
-		index += 1;
-	} while ("" == courseType);
-	// In some cases, the course type and description are not separated by |
-	// This means the course type is the last substring.
-	// Fix this by splitting it, assuming all course types are 3 characters long.
-	if ((substrings.length == index) && (3 < substrings[index-1].length)) {
-		substrings.push(substrings[index-1].slice(3).trim());
-		// console.log("Fixed un-split courseType and description", substrings);
 	}
-
 	/* Assumption:
 	 * The section directly after course type contains the scheduling information.
 	 */
 	// Retrieve the enrollment count
-	let dataString = substrings[index];
-	let enrolled = 0, newIndex = 0;
+	let enrolled=0, newIndex=0;
 	// Retrieve the enrolled count, which may be 0 but cannot be null or undefined.
 	[enrolled, _, newIndex] = getMatch(dataString, /Students\senrolled:\s(\d+)\s(\/ \d+)?/, 0);
 	enrolled = parseInt(enrolled); // "Cannot fail" because it is always an integer.
@@ -256,13 +243,14 @@ function parseDescriptionString(descriptionString) {
 
 	// Return the sections (remember we haven't got the location in the meetings yet)
 	return {
+		courseType:courseType,
 		enrolled:enrolled,
 		meetings:meetings,
 	}
 }
 
 /* Operates on the schedule portion of the string, which looks like:
- * 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115
+ * ... | LEC | Enrolled: 19 / 20 09/23/2019 - 12/06/2019 Mon, Wed, Fri 1:30 PM - 2:50 PM at McCullough 115
  */
 function parseScheduleString(dataString) {
 	// Declaring some variables...
@@ -272,6 +260,8 @@ function parseScheduleString(dataString) {
 	
 	// Retrieve the quarter start/end date
 	[startEndDate, _, newIndex] = getMatch(dataString, /(\d\d\/\d\d\/\d{4}\s-\s\d\d\/\d\d\/\d{4})/, "");
+
+	// Now move on to the rest of the string after the quarter start/end date.
 	dataString = dataString.slice(newIndex);
 
 	/* We want to find the times first. This is to determine where the days are
@@ -286,12 +276,12 @@ function parseScheduleString(dataString) {
 	[startTime, matchIndex, newIndex] = getMatch(dataString, /((\d{1,2}:\d{1,2})\s(A|P)M)/, null);
 	
 	// Save a piece of the string before the times, assuming it contains the days
-	const dayString = dataString.slice(0, matchIndex);
+	const stringStart = dataString.slice(0, matchIndex);
 	// Cut off the days and the startTime
 	dataString = dataString.slice(newIndex);
 
 	// Retrieve the endTime
-	[endTime, newIndex] = getMatch(dataString, /((\d{1,2}:\d{1,2})\s(A|P)M)/, null);
+	[endTime, matchIndex, newIndex] = getMatch(dataString, /((\d{1,2}:\d{1,2})\s(A|P)M)/, null);
 	dataString = dataString.slice(newIndex);
 
 	// Convert times from string to minutes past 00:00.
@@ -299,7 +289,8 @@ function parseScheduleString(dataString) {
 	endTime   = parseTime(endTime);
 
 	// Find the days in the piece we saved (returns [] if none found)
-	const days = parseDays(dayString);
+	const days = parseDays(stringStart);
+	// Back up
 
 	// Couldn't find times/days, this is OK because it happens at the end of the string.
 	if ((null == startTime) || (null == endTime) || (0 == days.length)) {
@@ -323,7 +314,8 @@ function parseScheduleString(dataString) {
 function getCourseType(courseTypeStr) {
 	const courseTypes = ["LEC", "SEM", "DIS", "LAB", "LBS", "ACT",
 	"CAS", "COL", "WKS", "INS", "IDS", "ISF", "ISS", "ITR", "API",
-	"LNG", "CLK", "PRA", "PRC", "RES", "SCS", "T/D"];
+	"LNG", "CLK", "PRA", "PRC", "RES", "SCS", "T/D", "CLN", "RSC",
+	"TUT", "SIM"];
 	if (courseTypes.includes(courseTypeStr)) {
 		return courseTypeStr;
 	}
