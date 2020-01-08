@@ -10,6 +10,8 @@
   "@comment dependencies": "TODO: go through to see which can of these can be upgraded",
   "dependencies": {
     "async": "^2.6.3",
+    "axios": "^0.19.1",
+    "cheerio": "^1.0.0-rc.3",
     "cookie-parser": "^1.4.4",
     "debug": "~2.6.9",
     "express": "^4.17.1",

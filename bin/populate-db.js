@@ -65,9 +65,13 @@ async function runScraper(scraper) {
         scraperResult.error = "No term selected";
         return scraperResult;
     }
-    depts.forEach(deptName => {
+    let failsafe = 0
+    depts.forEach(async deptName => {
+        if (failsafe > 6000)
+            return;
         if (deptName == "") return; 
-        levels.forEach(division => {
+        await sleep(1000);
+        levels.forEach(async division => {
             if (division === "") return; 
             // i suspect this never happens, dd -max
             let options = {
@@ -76,8 +80,9 @@ async function runScraper(scraper) {
                 division: division
             };
             await sleep(1000);
+            ++failsafe;
             scraper.run(options).then(courses => {
-                scraperResult.totalCourses += len(courses)
+                scraperResult.totalCourses += courses.length;
                 courses.forEach(course => courseCreate(course)); //console.log(course) //console.log(courseTitle, courseNumber);
             });
         });
@@ -93,7 +98,7 @@ async function populateDB(scrapers, options) {
 
 populateDB(scrapers).then(scraperResults => {
     scraperResults.forEach(res => 
-        console.log(`School: ${res.schoolName} -- Total Courses added to DB: ${res.totalCourses}`);
+        console.log(`School: ${res.schoolName} -- Total Courses added to DB: ${res.totalCourses}`)
     );
     mongoose.connection.close();
 })

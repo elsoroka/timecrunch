@@ -40,17 +40,18 @@ function process(courses, options) {
 	// fixed: each course was correct except that it was missing its courseLevel and its sections needed parsing
 }
 
-function scrapeCourse(course, courses) {
+function scrapeCourse(department, course, courses) {
     let sections = [];
     course["sections"].forEach(section => {
         scrapeSection(section, sections);
     });// side-effect: "sections" array is full
+
     courses.push({
         "courseNumber": course["courseNumber"],
         "courseTitle": course["courseTitle"],
         "sections": sections,
         "university": name(),
-        "department":department["deptCode"],
+        "department": department["deptCode"],
     });
 }
 
@@ -79,7 +80,7 @@ async function run(options) {
             json["schools"].forEach(school => {
                 school["departments"].forEach(department => {
                     department["courses"].forEach(course => {
-                        scrapeCourse(course, courses);
+                        scrapeCourse(department, course, courses);
                     });
                     /*if (final_res[department["deptCode"]]) {
                         final_res[department["deptCode"]].push(...courses);
