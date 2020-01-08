@@ -5,8 +5,11 @@ const mongoose = require('mongoose');
 const Course = require('../models/course')
 const UciScraper = require('./scrapers/uci-scraper')
 const StanfordScraper = require('./scrapers/stanford-scraper')
+const scrapers = [UciScraper, StanfordScraper]
 
 const userArgs = process.argv.slice(2);
+
+let universityDataDir = './bin/university-data';
 
 console.log('Read ./bin/university_data/<schoolname>.json to update database with course data. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0-mbdj7.mongodb.net/local_library?retryWrites=true');
 
@@ -33,111 +36,62 @@ mongoose.Promise = global.Promise;
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-function courseCreate(uni, div, dept, number, title, sections, cb) {
-    let courseinfo = {
-        university: uni, 
-        division: div, 
-        department: dept, 
-        courseNumber: number,
-        courseTitle: title, 
-    };
-
-    // upsert is true which means it will find the course and update it or create a new course if not present
+// course___() might be better encapsulted within models/course schema as a static function
+// upsert is true which means it will find the course and update it or create a new course if not present
+function courseUpsert(course) {
     // option "new" set to true means it will return the updated version instead of the original
     Course.findOneAndUpdate(courseinfo, {sections: sections}, {new: true, upsert: true}, 
         function (err, course) {
-            if (err) {
-                cb(err, null);
+            if (err) 
                 return;
-            }
-            console.log('New or Update Course: ' + course);
-            //courses.push(course);
-            cb(null, course)
-            return;
-        }
-    );
-}
-
-async function load_courses_all_universities(path, cb) {
-    const dir = await fs.promises.opendir(path)
-    for await (const dirent of dir) {
-        console.log(dirent.name)
-        fs.readFile(path + '/' + dirent.name, (err, data) => {
-            if (err) {
-                cb(err, null);
-                return
-            }
-            else {
-                let uniJson = JSON.parse(data);
-                let uniName = dirent.name.substr(0, dirent.name.lastIndexOf('.')); // TODO: we should store the name in the file instead to cleanly handle special chars
-                let div, dept, cls, courseNumber, courseTitle, section
-                //console.log(uniName);
-                for (div in uniJson) {
-                    //console.log(div)
-                    for (dept in uniJson[div]) {
-                        //console.log(dept)
-                        for (course_index in uniJson[div][dept]){
-                            cls = uniJson[div][dept][course_index]
-                            //console.log(cls)
-                            courseNumber = cls.courseNumber
-                            courseTitle = cls.courseTitle
-                            //console.log(courseTitle, courseNumber);
-                            courseCreate(uniName, div, dept, courseNumber, courseTitle, cls.sections, cb);
-                        }
-                    }
-                }
-            }
+            console.log(`${course.university}:: New or Updated Course: ${course}`);
         });
+}
+
+async function runScraper(scraper) {
+
+    let scraperResult = {
+        schoolName: scraper.name(),
+        totalCourses: 0
+    };
+    const depts  = scraper.departments();
+    const levels = scraper.levels();
+    const term   = scraper.currentTerm();
+    //TODO: more validation for options
+    if (term === "") {
+        scraperResult.error = "No term selected";
+        return scraperResult;
     }
-}
-
-function readUniversityData(path, cb) {
-   load_courses_all_universities(path, cb).catch(console.error)
-}
-
-function finish(err, results) {
-    if (err) 
-        console.log('FINAL ERR: '+err);
-    else {
-        console.log('CourseInstances: '+ results);
-    }
-    // All done, disconnect from database
-    mongoose.connection.close();
-}
-
-async function runScraper() {
-    let schoolJson = {};
-    depts  = scraper.departments();
-    levels = scraper.levels();
-    term   = scraper.currentTerm();
-    // fill in the levels for schoolJson
-    levels.forEach((level,_) => schoolJson[level] = {});
-    depts.forEach((deptName, deptDelay) => {
-        if (deptName != "") {
-            levels.forEach((division, divDelay) => {
-                let options = {
-                    term: term,
-                    department: deptName,
-                    division: division
-                };
-                await sleep(deptDelay*5000 + divDelay*1000);
-                scraper.run(options).then(writeJsonToFile);
+    depts.forEach(deptName => {
+        if (deptName == "") return; 
+        levels.forEach(division => {
+            if (division === "") return; 
+            // i suspect this never happens, dd -max
+            let options = {
+                term: term,
+                department: deptName,
+                division: division
+            };
+            await sleep(1000);
+            scraper.run(options).then(courses => {
+                scraperResult.totalCourses += len(courses)
+                courses.forEach(course => courseCreate(course)); //console.log(course) //console.log(courseTitle, courseNumber);
             });
-        }
+        });
     });
+    return scraperResult; 
 }
 
-function scraperControl(scrapers) {
-    // for the each scraper, call scraper.run()
-    scrapers.forEach(scraper => {
-        let schoolJson = {};
-        depts  = scraper.departments();
-        levels = scraper.levels();
-        term   = scraper.currentTerm();
-        runScraper(scraper);
-    });
+async function populateDB(scrapers, options) {
+    // run each scraper asynchronously
+    //return when finished with all scrapers
+    return Promise.all(scrapers.map(scraper => runScraper(scraper)))
 }
 
-let path_to_university_json = './bin/university-data';
-readUniversityData(path_to_university_json, finish)
+populateDB(scrapers).then(scraperResults => {
+    scraperResults.forEach(res => 
+        console.log(`School: ${res.schoolName} -- Total Courses added to DB: ${res.totalCourses}`);
+    );
+    mongoose.connection.close();
+})
 

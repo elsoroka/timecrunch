@@ -33,9 +33,11 @@ function process(courses, options) {
     // we just have it from options
     const courseLevel = options["division"];
     courses.forEach(course => {
-        course = parseSections(course.sections);
+        course.sections = parseSections(course.sections);
+		course.division = courseLevel;
     });
-    return courses; // fix
+    return courses;
+	// fixed: each course was correct except that it was missing its courseLevel and its sections needed parsing
 }
 
 function scrapeCourse(course, courses) {
