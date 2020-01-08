@@ -36,6 +36,9 @@ mongoose.Promise = global.Promise;
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+// sleep function to delay between scraper calls
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 // course___() might be better encapsulted within models/course schema as a static function
 // upsert is true which means it will find the course and update it or create a new course if not present
 function courseUpsert(course) {
