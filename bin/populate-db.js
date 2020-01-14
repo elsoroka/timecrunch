@@ -1,8 +1,11 @@
 #! /usr/bin/env node
-const fs = require('fs')
+const fs = require('fs');
+const path = require('path');
 const async = require('async')
 const mongoose = require('mongoose');
 const Course = require('../models/course')
+const University = require('../models/university')
+const StanfordScraper = require('./scrapers/stanford-scraper.js')
 
 const userArgs = process.argv.slice(2);
 console.log('Read ./bin/university_data/<schoolname>.json to update database with course data. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0-mbdj7.mongodb.net/local_library?retryWrites=true');
@@ -59,9 +62,9 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
 }
 
 async function load_courses_all_universities(path, cb) {
-    const dir = await fs.promises.opendir(path)
+    const dir = await fs.promises.opendir(path);
     for await (const dirent of dir) {
-        console.log(dirent.name)
+        console.log("File", dirent.name)
         fs.readFile(path + '/' + dirent.name, (err, data) => {
             if (err) {
                 cb(err, null);
@@ -92,7 +95,7 @@ async function load_courses_all_universities(path, cb) {
 }
 
 function readUniversityData(path, cb){
-   load_courses_all_universities(path, cb).catch(console.error)
+   load_courses_all_universities(path, cb).catch(console.error);
 }
 
 function finish(err, results) {
@@ -102,8 +105,36 @@ function finish(err, results) {
         console.log('CourseInstances: '+ results);
     }
     // All done, disconnect from database
-    mongoose.connection.close();
+    // HACK! TODO: Figure out where to put this!
+    // it should close at the END of the connection!
+    // Right here it will close at some random point and break the uploading.
+    // ~emi
+    // mongoose.connection.close();
 }
 
-let path_to_university_json = './bin/university-data';
-readUniversityData(path_to_university_json, finish)
+async function uploadUniversityObject(scraper, name, cb){
+    const conditions = {university:name};
+    const projection = {_id:1};
+    let query = Course.find(conditions, projection);
+    console.log(conditions);
+    let result = await query.exec( function(err, courses) {
+        console.log("RECEIVED", courses.length, "results");
+        let university = {
+            name: scraper.name(),
+            departments: scraper.departments(),
+            divisions: scraper.levels(),
+            courses: courses,
+        };
+        University.findOneAndUpdate({university:name}, university, {new:true, upsert: true},
+            function (err, result) {
+                console.log("Result", result);
+                console.log("Added object for", scraper.name());
+                //cb(); // TODO: Why does it crash?
+            });
+    });
+}
+
+//let path_to_university_json = './bin/university-data';
+//readUniversityData(path_to_university_json, finish);
+
+uploadUniversityObject(StanfordScraper, 'stanford', mongoose.connection.close);
