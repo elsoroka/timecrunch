@@ -99,12 +99,7 @@ class GenericHeatmap {
                             let classname = course.courseNumber;
                             if (!classname.startsWith(course.department)) 
                             	classname = course.department + classname;
-<<<<<<< HEAD
-                            }
                             console.log(this.heatmap[row][col], row, col)
-=======
-
->>>>>>> feature/course-names-in-mouseover
                             this.heatmap[row][col].count += section.enrolled;
 							// if empty "class," else ",class"
 							let classStr = this.heatmap[row][col].classnames == ""  
