@@ -147,6 +147,8 @@ function buildHeatmap(heatmapJson) {
     svg.append("g")
         .attr("id", "day-axis")
         .style("font-size", 22)
+        .style("font-weight", 700)
+        .style("font-family", "Quicksand, sans-serif")
         .attr("transform", "translate(0," + 0 + ")")
         .classed("x axis", true)
         //.select(".domain").remove()
@@ -154,6 +156,8 @@ function buildHeatmap(heatmapJson) {
     svg.append("g")
         .attr("id", "time-axis")
         .style("font-size", 16)
+        .style("font-weight", 700)
+        .style("font-family", "Quicksand, sans-serif")
         .attr("transform", "translate(0," + -24 + ")")
         .classed("y axis", true)
 
