@@ -21,15 +21,6 @@ console.log(`[${getFormattedTimeStamp(new Date)}] Initializing heatmap...`);
 console.log(JSON.stringify(hm));
 console.log(weekdayNames);
 console.log(timeIncrements);
-
-[
-    {dep1, div1}
-    {dep2, div2}
-    {any, div3}
-]
-
-
-
 */
 
 
@@ -136,7 +127,7 @@ function buildHeatmap(heatmapJson) {
     let mousemove = function(d) {
         tooltip
           .html(d.value + " students in class " + d.classnames)
-          .style("left", (d3.mouse(this)[0]+70) + "px")
+          .style("left", (d3.mouse(this)[0]+10) + "px")
           .style("top", (d3.mouse(this)[1]) + "px")
     }
 

@@ -25,10 +25,36 @@ mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-db.once('open', uploadUniversityObject);
+// one-off to add stanford to the DB 
+//db.once('open', uploadUniversityObject);
+// hotfix: stanford courses have a trailing semi-colon
+db.once('open', hotfixFixCourseNumberStanford);
+function hotfixFixCourseNumberStanford(){
+    var fixedCourses = []
+    Course.find({university: "stanford"}).cursor()
+        .on('data', function(doc){
+            if (doc.courseNumber.includes(":")){
+                console.log(doc.courseNumber);
+                doc.courseNumber = doc.courseNumber.replace(/:$/, "");
+                fixedCourses.push(doc)
+            }
+        })
+        .on('end', function() {
+            console.log(`end::courses to fix:${fixedCourses.length}`);
+            async.each(fixedCourses, 
+                async function(course, _) {
+                    console.log(course);
+                    await course.save();
+                }, 
+                function(err) {
+                  if (err) return console.log(err);
+                    console.log("db closing");
+                    db.close();
+                });
+        });
+};
 
 function courseCreate(uni, div, dept, number, title, sections, cb) {
     let courseinfo = {
@@ -38,14 +64,6 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
         courseNumber: number,
         courseTitle: title, 
     };
-
-    //console.log(sections);
-    // create array of  parsed sections
-    // We don't need this anymore because the JSON file is already parsed. The parsing is moved to uci-scraper.js ~emi
-    // const parsed_sections = Course.parseSections(sections);
-    // if (parsed_sections == null) {
-    //     return;
-    // }
 
     // upsert is true which means it will find the course and update it or create a new course if not present
     // option "new" set to true means it will return the updated version instead of the original
@@ -106,13 +124,8 @@ function finish(err, results) {
     else {
         console.log('CourseInstances: '+ results);
     }
-    mongoose.connection.close();
-    // All done, disconnect from database
-    // HACK! TODO: Figure out where to put this!
-    // it should close at the END of the connection!
-    // Right here it will close at some random point and break the uploading.
-    // ~emi
-}
+    db.close();
+ }
 
 
 scraper = StanfordScraper
