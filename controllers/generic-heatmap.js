@@ -75,7 +75,6 @@ class GenericHeatmap {
 
 	fill(courses) {
         //let dbg = this.dbg(this.getFill_id);
-        console.log("\n\nFirst", this.heatmap[0][0], "\n\n");
         courses.forEach(course => { 
         //    dbg({course});
             course.sections.forEach(section => {
@@ -100,7 +99,6 @@ class GenericHeatmap {
                             if (!classname.startsWith(course.department)) {
                             	classname = course.department + classname;
                             }
-                            console.log(this.heatmap[row][col], row, col)
                             this.heatmap[row][col].count += section.enrolled;
                             this.heatmap[row][col].classnames += classname + ", ";
                         }); //end for cols
