@@ -51,7 +51,7 @@ function buildHeatmap(heatmapJson) {
 
     // TODO: programmatically determine width and height 
     // set the dimensions and margins of the graph
-    const margin = {top: 90, right: 0, bottom: 100, left: 70};//$('#input-form-container').width()}
+    const margin = {top: 90, right: 10, bottom: 100, left: 70};//$('#input-form-container').width()}
     //let width = document.getElementById('schedule-container').offsetWidth - margin.left - margin.right;
     console.log(`wrapper-width= ${$('.wrapper').width()}`);
     console.log(`input-forrm-width= ${$('#input-form-container').width()}`);
