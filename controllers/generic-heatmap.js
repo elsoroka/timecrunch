@@ -84,12 +84,12 @@ class GenericHeatmap {
                     if (meeting.timeIsTBA) 
                         return; // in a .forEach, this works like continue, i.e. goes to next element
                     const rows = this.getRows(meeting.startTime, meeting.endTime);
-                    const cols = this.getCols(meeting.days);
+					const cols = this.getCols(meeting.days);
                     //console.log("Rows", rows, "Cols", cols);
                     rows.forEach(row => { 
                         //console.log("row", row);
                         cols.forEach( col => {
-                            //console.log("col", col);
+                            // console.log("col", col);
                             // HACK! HACK! HACK! TODO: FIX THIS HACK!
                             // Some of the data has the course.courseNumber like "EE 364A"
                             // e.g. the dept + courseNumber
@@ -97,13 +97,21 @@ class GenericHeatmap {
                             // construct a "name" which has the dept + number
                             // ~emi
                             let classname = course.courseNumber;
-                            if (!classname.startsWith(course.department)) {
+                            if (!classname.startsWith(course.department)) 
                             	classname = course.department + classname;
+<<<<<<< HEAD
                             }
                             console.log(this.heatmap[row][col], row, col)
+=======
+
+>>>>>>> feature/course-names-in-mouseover
                             this.heatmap[row][col].count += section.enrolled;
-                            this.heatmap[row][col].classnames += classname + ", ";
-                        }); //end for cols
+							// if empty "class," else ",class"
+							let classStr = this.heatmap[row][col].classnames == ""  
+								?  `${classname}, `  
+								: `, ${classname}`;
+							this.heatmap[row][col].classnames += classStr
+                        }); //end for col
                     }); // end for rows
 
                 }); //end for meetings

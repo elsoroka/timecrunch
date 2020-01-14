@@ -92,11 +92,16 @@ const executeQuery = (req, res, next) => {
         }
     });
 
+<<<<<<< HEAD
     // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
     //let for_university = { university: req.body.university }; 
     union_of_conditions[0].university = req.body.university.toLowerCase();
 
     console.log(`conditions=${JSON.stringify(union_of_conditions)}`);
+=======
+    // look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
+    let for_university = { university: req.body.university }; 
+>>>>>>> feature/course-names-in-mouseover
     // Build the query to get all courses 
     let course_query = Course.find().or(union_of_conditions);//.orFail();//new Error("No courses found")); 
     // Run the query, exec returns a Promise
