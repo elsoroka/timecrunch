@@ -21,7 +21,7 @@ const getEmptyHeatmap = (req, res, next) => {
 // The final stage of the route process of a /timecrunch GET request, 
 // i.e. a typical scenario of a user landing on the site.
 const renderFinal = (req, res) => {
-    console.log(res.locals.heatmap_object);
+    //console.log(res.locals.heatmap_object);
     console.log("called res.render");
 	res.render('layout', {title: 'timecrunch', server_data: res.locals.heatmap_object });
 };
@@ -30,7 +30,7 @@ const renderFinal = (req, res) => {
 // i.e. a typical scenario of a user interacting with the input form 
 // or the initial arrival to an empty heatmap
 const sendHeatmapJson = (req, res) => {
-    console.log(res.locals.heatmap_object);
+    //console.log(res.locals.heatmap_object);
     console.log("set heatmapJson via res.json");
     res.json(res.locals.heatmap_object);
 };
@@ -114,18 +114,12 @@ const executeQuery = (req, res, next) => {
        // let heatmap_dict = heatmap_data //view_dict(heatmap_data);
         // ELS: Not sure what this is so I temporarily added the old render call
         // res.render('timecrunch_interface_with_heatmap_data', heatmap_dict);
-        // Make an array of just the counts for doing the colors
-        // ~emi
-        let hmCounts = new Array(hm.heatmap.length).fill(0).map(
-        (_, i) => new Array(hm.heatmap[i].length).fill(0).map((_, j) => hm.heatmap[i][j].count));
-        console.log("Counts", hmCounts);
 
         res.locals.heatmap_object = {
             init: "false",
             weekdayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
             timeIncrements: hm.incrementLabels,
             heatmap: hm.heatmap,
-            counts:hmCounts,
         };
         console.log("interfaceController:: about to render heatmap");
         next();
