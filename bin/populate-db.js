@@ -125,7 +125,7 @@ async function uploadUniversityObject(scraper, name, cb){
             divisions: scraper.levels(),
             courses: courses,
         };
-        University.findOneAndUpdate({university:name}, university, {new:true, upsert: true},
+        University.save(university,
             function (err, result) {
                 console.log("Result", result);
                 console.log("Added object for", scraper.name());
