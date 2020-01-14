@@ -93,7 +93,7 @@ const executeQuery = (req, res, next) => {
     });
     console.log(`conditions=${JSON.stringify(union_of_conditions)}`);
 
-    // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
+    // look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
     let for_university = { university: req.body.university }; 
     // Build the query to get all courses 
     let course_query = Course.find().or(union_of_conditions);//.orFail();//new Error("No courses found")); 
