@@ -60,14 +60,17 @@ function buildHeatmap(heatmapJson) {
 
     // TODO: programmatically determine width and height 
     // set the dimensions and margins of the graph
-    const margin = {top: 100, right: 25, bottom: 30, left: 70}
+    const margin = {top: 90, right: 0, bottom: 100, left: 70};//$('#input-form-container').width()}
     //let width = document.getElementById('schedule-container').offsetWidth - margin.left - margin.right;
-    console.log(`input-forrm-width= ${$('#user-input-form-container').width()}`);
+    console.log(`wrapper-width= ${$('.wrapper').width()}`);
+    console.log(`input-forrm-width= ${$('#input-form-container').width()}`);
     console.log(`window-width= ${$(document).width()}`);
-    let remainingWidth =  $(document).width() - $('#user-input-form-container').width();
+    console.log(`schedule-container-width=${$('#schedule-container').width()}`);
+    let remainingWidth = $(document).width() - $('#input-form-container').width();// - $('#heatmap-container').width();
 
-    let width =  remainingWidth - margin.left - margin.right;
-    let height = Math.max(Math.min(window.innerHeight,850),500)  - margin.top - margin.bottom;
+    let width =  $("#schedule-container").width() - margin.left - margin.right;
+    console.log(`width=${width}`);
+    let height = $("#schedule-container").height() - margin.top - margin.bottom;
 
     //window.onresize = function(){ location.reload(); }
 
