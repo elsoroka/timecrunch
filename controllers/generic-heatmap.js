@@ -146,7 +146,10 @@ class GenericHeatmap {
         
 	    const start  = Math.floor((startMinutes-this.timeStart)/this.timeStep);
 	    const end    = Math.ceil((endMinutes-this.timeStart)/this.timeStep);
-	    const length = end-start;
+	    let length = end-start;
+	    if (length < 0) {
+	    	length = 0;
+	    }
         //dbg({end});
         //dbg({start});
         //dbg({length});

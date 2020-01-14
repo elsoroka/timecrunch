@@ -52,7 +52,6 @@ function cb(scraper, options) {
                 console.log(err, finalJson);
                 console.log(options["division"], options["department"], "not ok");
             } else {
-                //console.log(finalJson);
                 console.log(options["division"], options["department"], "ok");
             }
         });
