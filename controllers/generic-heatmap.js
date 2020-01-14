@@ -99,7 +99,10 @@ class GenericHeatmap {
                             	classname = course.department + classname;
 
                             this.heatmap[row][col].count += section.enrolled;
-							classStr = this.heatmap[row][col].classnames == "" ? `${classname}, ` : `, ${classname}`;
+							// if empty "class," else ",class"
+							let classStr = this.heatmap[row][col].classnames == ""  
+								?  `${classname}, `  
+								: `, ${classname}`;
 							this.heatmap[row][col].classnames += classStr
                         }); //end for col
                     }); // end for rows
