@@ -106,18 +106,26 @@ const executeQuery = (req, res, next) => {
             next()
         }
 
-        console.log("COURSES:");
-        console.log(courses);
+        //console.log("COURSES:");
+        //console.log(courses);
+        console.log("Found", courses.length, "courses")
         hm = new GenericHeatmap(10); // timestep of 10 minutes
         hm.fill(courses); //2d array populated with the course info
        // let heatmap_dict = heatmap_data //view_dict(heatmap_data);
         // ELS: Not sure what this is so I temporarily added the old render call
         // res.render('timecrunch_interface_with_heatmap_data', heatmap_dict);
+        // Make an array of just the counts for doing the colors
+        // ~emi
+        let hmCounts = new Array(hm.heatmap.length).fill(0).map(
+        (_, i) => new Array(hm.heatmap[i].length).fill(0).map((_, j) => hm.heatmap[i][j].count));
+        console.log("Counts", hmCounts);
+
         res.locals.heatmap_object = {
             init: "false",
             weekdayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
             timeIncrements: hm.incrementLabels,
-            heatmap: hm.heatmap 
+            heatmap: hm.heatmap,
+            counts:hmCounts,
         };
         console.log("interfaceController:: about to render heatmap");
         next();

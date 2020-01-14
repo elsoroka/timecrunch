@@ -135,7 +135,7 @@ function buildHeatmap(heatmapJson) {
 
     let mousemove = function(d) {
         tooltip
-          .html("The exact value of<br>this cell is: " + d.value)
+          .html(d.value + " students in class " + d.classnames)
           .style("left", (d3.mouse(this)[0]+70) + "px")
           .style("top", (d3.mouse(this)[1]) + "px")
     }
@@ -185,9 +185,14 @@ function buildHeatmap(heatmapJson) {
      * Heatmap Colorscheme
      */
     // Build color scale
+    // Make an array of just the counts for doing the colors
+        // ~emi
+    let hmCounts = new Array(hm.length).fill(0).map(
+        (_, i) => new Array(hm[i].length).fill(0).map((_, j) => hm[i][j].count));
+
     let myColor = d3.scaleLinear()
         //scaleSequential().interpolator(d3.interpolateInferno)
-        .domain([0, Math.max(...[].concat(...hm))/2])
+        .domain([0, Math.max(...[].concat(...hmCounts))/2])
                 //d3.max(hm, function(d) {return d.count; })/2, d3.max(hm, function(d) {return d.count;})])
         .range(["#CBEBF6", "#3E9583"]);
     //.range(["#FFFFDD", "#3E9583", "#1F2D86"]);  //original colorscheme
@@ -202,7 +207,7 @@ function buildHeatmap(heatmapJson) {
             //console.log(`d=${d},i=${i}`);
             //d.forEach(function(dat){ console.log(dat); });
             return Array.from(d, function(x){
-                return {value: x, row: i};
+                return {value: x.count, row: i, classnames:x.classnames};
             });//{datum:d, rowidx: i};}) // what is d?
         })
         .enter()

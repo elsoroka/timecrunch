@@ -13,7 +13,7 @@ const CourseSchema = new Schema(
 	sections: 
     [{
         enrolled: Number,       // enrolled under this department
-        meetings: 
+        meetings:
         [{
             bldg: String,
             timeIsTBA: Boolean, // if true, then times are not valid
