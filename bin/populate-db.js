@@ -119,15 +119,16 @@ async function uploadUniversityObject(scraper, name, cb){
     console.log(conditions);
     let result = await query.exec( function(err, courses) {
         console.log("RECEIVED", courses.length, "results");
-        let university = {
-            name: scraper.name(),
+        let university = new University({
+            name: name,
             departments: scraper.departments(),
             divisions: scraper.levels(),
             courses: courses,
-        };
-        University.save(university,
+        });
+        //University.findOneAndUpdate({name:name}, university,
+        university.save(
             function (err, result) {
-                console.log("Result", result);
+                console.log("error", err, "Result", result);
                 console.log("Added object for", scraper.name());
                 //cb(); // TODO: Why does it crash?
             });
