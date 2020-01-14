@@ -7,8 +7,6 @@ $( function() {
      * so parts of this may look patchy and messy
      * */
     
-
-
     // Globals
     let finishedArr = [];
     let departmentDropdownCount = 0;

@@ -126,14 +126,15 @@ function uploadUniversityObject(){
         courseIds = []
         courses.forEach(course => courseIds.push(course._id));
         let university = new University({
-            name: scraper.name(),
+            //name: scraper.name().toLowerCase(),
+            name: name,
             departments: scraper.departments(),
             divisions: scraper.levels(),
             courses: courseIds
         });
         university.save( function(err, uni){
             if (err) return console.error(err);
-            console.log(`saved:\n ${uni.name}`)
+            console.log(`saved:\n ${uni.name.toLowerCase()}`);
             mongoose.connection.close();
         });
     })
