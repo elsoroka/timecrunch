@@ -4,6 +4,8 @@
  */
 const assert = require('assert');
 
+function blankcell() {return {count:0, classnames:""}; }
+
 class GenericHeatmap {
 	/* Construct a Heatmap with a given time increment
 	 * The time increment represents one row in the heatmap.
@@ -52,7 +54,6 @@ class GenericHeatmap {
 		// the array size will change.
 		const nRows = Math.ceil((defaultTimeStop-defaultTimeStart)/timeStep);
 		// Generate an array of these objects
-		function blankcell() {return {count:0, classnames:""}; }
 
 		this.heatmap = new Array(nRows).fill(0).map(
 			() => new Array(defaultDays).fill(0).map(blankcell));
@@ -74,6 +75,7 @@ class GenericHeatmap {
 
 	fill(courses) {
         //let dbg = this.dbg(this.getFill_id);
+        console.log("\n\nFirst", this.heatmap[0][0], "\n\n");
         courses.forEach(course => { 
         //    dbg({course});
             course.sections.forEach(section => {
@@ -98,6 +100,7 @@ class GenericHeatmap {
                             if (!classname.startsWith(course.department)) {
                             	classname = course.department + classname;
                             }
+                            console.log(this.heatmap[row][col], row, col)
                             this.heatmap[row][col].count += section.enrolled;
                             this.heatmap[row][col].classnames += classname + ", ";
                         }); //end for cols
@@ -119,7 +122,7 @@ class GenericHeatmap {
 	    	const hoursToAdd = Math.ceil((this.timeStart - startMinutes)/60);
 	    	// Because we have guaranteed 60/this.timeStep is integer, this is safe.
             //console.log(`${this.getRows_id} hoursToAdd = ${hoursToAdd}`);
-	    	const newRows = new Array(hoursToAdd*60/this.timeStep).fill(0).map( () => new Array(this.days).fill(0));
+	    	const newRows = new Array(hoursToAdd*60/this.timeStep).fill(0).map( () => new Array(this.days).fill(0).map(blankcell));
 	    	
 	    	this.heatmap.unshift(...newRows);
 	    	// Fix the starting time
@@ -129,7 +132,7 @@ class GenericHeatmap {
 	    // If endMinutes is LATER than the last row, append row(s) to display it.
 	    if (endMinutes > this.timeStop) {
 	    	const hoursToAdd = Math.ceil((endMinutes - this.timeStop)/60);
-	    	const newRows = new Array(hoursToAdd*60/this.timeStep).fill(0).map( () => new Array(this.days).fill(0));
+	    	const newRows = new Array(hoursToAdd*60/this.timeStep).fill(0).map( () => new Array(this.days).fill(0).map(blankcell));
 	    	this.heatmap.push(...newRows);
 	    	// Fix te ending time
 	    	this.timeStop += newRows.length*this.timeStep;
@@ -206,7 +209,6 @@ class GenericHeatmap {
             //mins = i % 2 == 0 ? ':00' : ':30';
             incrementLabels.push(hours + mins + ampm);
         }
-        function blankcell() {return {count:0, classnames:""}; }
 
         let empty_heatmap = [...Array(max_time)].map(() => Array(5).fill(0).map(blankcell));
         // Create an array of just counts for doing color data
