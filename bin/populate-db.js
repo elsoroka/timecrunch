@@ -28,6 +28,8 @@ mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+db.once('open', uploadUniversityObject);
+
 function courseCreate(uni, div, dept, number, title, sections, cb) {
     let courseinfo = {
         university: uni, 
@@ -104,37 +106,41 @@ function finish(err, results) {
     else {
         console.log('CourseInstances: '+ results);
     }
+    mongoose.connection.close();
     // All done, disconnect from database
     // HACK! TODO: Figure out where to put this!
     // it should close at the END of the connection!
     // Right here it will close at some random point and break the uploading.
     // ~emi
-    // mongoose.connection.close();
 }
 
-async function uploadUniversityObject(scraper, name, cb){
+
+scraper = StanfordScraper
+name = "stanford"
+function uploadUniversityObject(){
     const conditions = {university:name};
-    const projection = {_id:1};
-    let query = Course.find(conditions, projection);
     console.log(conditions);
-    let result = await query.exec( function(err, courses) {
+    Course.find(conditions, function(err, courses){
+        if (err) return console.error(err);
         console.log("RECEIVED", courses.length, "results");
-        let university = {
+        courseIds = []
+        courses.forEach(course => courseIds.push(course._id));
+        let university = new University({
             name: scraper.name(),
             departments: scraper.departments(),
             divisions: scraper.levels(),
-            courses: courses,
-        };
-        University.save(university,
-            function (err, result) {
-                console.log("Result", result);
-                console.log("Added object for", scraper.name());
-                //cb(); // TODO: Why does it crash?
-            });
-    });
+            courses: courseIds
+        });
+        university.save( function(err, uni){
+            if (err) return console.error(err);
+            console.log(`saved:\n ${uni.name}`)
+            mongoose.connection.close();
+        });
+    })
 }
 
 //let path_to_university_json = './bin/university-data';
 //readUniversityData(path_to_university_json, finish);
+//uploadUniversityObject(StanfordScraper, 'stanford'), finish);
 
-uploadUniversityObject(StanfordScraper, 'stanford', mongoose.connection.close);
+
