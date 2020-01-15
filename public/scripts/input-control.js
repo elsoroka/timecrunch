@@ -8,21 +8,21 @@ $( function() {
      * */
     
     // Globals
-    let finishedArr = [];
-    let departmentDropdownCount = 0;
-    let departmentDropdownId = 0;
-    let divisionDropdownId = 0;  
-    let currentRow = 0;
-    let departmentList = ['Any Department'];
-    let divisionList = ['Any Course Level'];
-    let selectedUniversityName = undefined;
-    let demographicRowId = 0;
+    let demRowCount = 0;
+    let demographicDropdownId = 0
+        departmentDropdownId = 0,
+        divisionDropdownId = 0;  
+    let departmentListPlaceholder   = "Any Department",
+        divisionListPlaceholder      = "Any Course Level";
 
+    let departmentList  =   [departmentListPlaceholder];
+    let divisionList    =   [divisionListPlaceholder];
+    let selectedUniversityName = undefined;
+
+    console.log(`hello from jquery`);
 
     const demographicDropdown = Handlebars.compile($("#demographic-dropdowns-template").html());
-
     const demogButtons = Handlebars.compile($('#add-demographic-button-template').html());
-
 
     /*
      * Programmatically create a demographic selection drop down box
@@ -46,6 +46,7 @@ $( function() {
             division = demographic.division;
 
         thisParent.html(dropdownTemplate({
+            demographicId: demographic.containerId,
             departmentId: department.containerId,
             divisionId: division.containerId
         }));
@@ -55,30 +56,41 @@ $( function() {
     }
 
     // replace Add <Demographic> with corresponding Selection dropdown  box
-    $('#demographics-rows-group').on('click', 'button', function() {
+    $('#demographics-rows-group').on('click', '.add-demog-btn', function() {
         if($(this).hasClass('add-demog-btn')) {
+            ++demRowCount;
             replaceWithSelectionDropdowns(
                 $(this).parent(), 
                 demographicDropdown,
                 { 
+                    containerId: demographicDropdownId,
                     department: { 
-                        containerId: `department-dropdown-${departmentDropdownId}`, 
+                        containerId: `department-dropdown-${demographicDropdownId}`, 
                         demList: departmentList 
                     },
                     division: { 
-                        containerId: `division-dropdown-${divisionDropdownId}`, 
+                        containerId: `division-dropdown-${demographicDropdownId}`, 
                         demList: divisionList 
                     }
                 }
             );
-
-            ++departmentDropdownId;
-            ++divisionDropdownId;
-            ++departmentDropdownCount;
+            ++demographicDropdownId;
         }
 
         // add next row of buttons 
         $('#demographics-rows-group').append(demogButtons());
+    });
+
+    // remove dropdown  boxes
+    $('#demographics-rows-group').on('click', '.remove-demog-btn', function() {
+        console.log('removing demogs');
+        if($(this).hasClass('remove-demog-btn')) {
+            --demRowCount;
+            console.log('checking parent');
+            console.log($(this).parent())
+            $(this).parent().parent().parent().parent().remove()
+        }
+
     });
 
 
@@ -143,10 +155,11 @@ $( function() {
 			console.log(`isdropdownopne = ${isDropdownOpen}`);
         }
 	});
+
     $("#school-drop-down").change( function() {
 		let loadSortedDemographicsList = (dl, rl) => {
 			let placeholder = [dl[0]];
-			dl = Array.from(new Set([...rl])); // original demographicsList, newly populated results list 
+			dl = Array.from(new Set([...rl])).filter(Boolean); // original demographicsList, newly populated results list 
 			dl.sort();
 			return Array.from(placeholder.concat(dl));
 		};
@@ -161,15 +174,19 @@ $( function() {
             if (selectedUniversityName === undefined || selectedUniversityName !== tempSchoolSelection) {
                 // new school choice
                 selectedUniversityName = tempSchoolSelection; // remember this school choice
+                $('#demographics-rows-group').children().remove(); // remove any previous demographics html elements
+                divisionList = [divisionListPlaceholder];
+                departmentList = [departmentListPlaceholder];
+
                 $.get("/timecrunch/setSchool", {university_name: selectedUniversityName}, function(res) {
                     let deptsNameLabel = "dept_names", divsNameLabel = "division_names";
                     let demographics = [];//new Array(2)
 
-					
                     // load demographics from server
 					departmentList = loadSortedDemographicsList(departmentList, res.departments);
 					divisionList = Array.from(new Set([...divisionList, ...res.divisions]));
-					
+
+                    
 
                     // add first row of buttons -- when school choice is selected
                     $('#demographics-rows-group').append(demogButtons());
@@ -177,7 +194,7 @@ $( function() {
 
                 });
 				// show demographics prompt:
-				$('.input-form-title').toggleClass("school-is-selected");
+				$('.input-form-title').addClass("school-is-selected");
 
             }
         }
@@ -205,9 +222,7 @@ $( function() {
         return selectedUniversityName;
     }
 
-    // warning: not using this right now using the more general version below 
-    // but TODO: allow for things like lower MATH + upper ARABIC  etc.
-    function getSelectedDemographic(thisRow, selectorStr, placeholder = "Any ") {
+    function getSelectedDemographic(thisRow, selectorStr, placeholder = "--") {
         let demRow = [] 
         $.each(thisRow.find(selectorStr), function(_, option) {
             if (!option.text.startsWith(placeholder))
@@ -231,11 +246,10 @@ $( function() {
     function getDemographicRows(selectorStr, placeholder) {
         let demographicRequest = [] //new Set();
         // [ { [], [] },  ]
-        //
         console.log(`dm`);
         $.each($(".demographic-row"), function(){
-            let depts = getSelectedDemographic($(this), ".department-selection option:selected");
-            let divis = getSelectedDemographic($(this), ".division-selection option:selected");
+            let depts = getSelectedDemographic($(this), ".department-selection option:selected", departmentListPlaceholder);
+            let divis = getSelectedDemographic($(this), ".division-selection option:selected", divisionListPlaceholder);
             let query = {departments: depts, divisions: divis}
             console.log(`query=${query.departments}|${query.divisions}`);
             demographicRequest.push(query);

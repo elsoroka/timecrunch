@@ -18,12 +18,30 @@ const getEmptyHeatmap = (req, res, next) => {
     next();
 };
 
+const getSchools = (req, res, next) => {
+	University.find({}, {name: 1, _id: 0}, function(err, names) {
+		console.log("university names");
+		console.log(names)
+		if (err) {
+			console.log("error finding univesity");
+			return next(err);
+		}
+
+		res.locals.schoolsInDatabase = Array.from(names, projection => projection.name);
+		console.log("array from names:")
+		console.log(res.locals.schoolsInDatabase)
+		next();
+		return;
+	});
+};
+
 // The final stage of the route process of a /timecrunch GET request, 
 // i.e. a typical scenario of a user landing on the site.
 const renderFinal = (req, res) => {
     //console.log(res.locals.heatmap_object);
-    console.log("called res.render");
-	res.render('layout', {title: 'timecrunch', server_data: res.locals.heatmap_object });
+    console.log("calling res.render");
+	console.log(res.locals.schoolsInDatabase);
+	res.render('layout', {title: 'timecrunch', server_data: res.locals.heatmap_object, schools: res.locals.schoolsInDatabase});
 };
 
 // The final stage of the route process of a POST request that wants to redraw the heatmap,
@@ -54,17 +72,6 @@ const executeQuery = (req, res, next) => {
     console.log(`executyQuery:39:req.body.selections=${req.body.selections}`)
     console.log(toType(req.body.selections));
     console.log(req.body.selections);
-
-
-    /*
-    let departments = req.body.departments.split(',');//JSON.parse('[' + req.body.departments + ']');
-    let divisions = req.body.divisions.split(',');
-    console.log(departments);
-    if (Array.isArray(req.body.departments)) console.log(`isarray`);
-    if (Array.isArray(departments)) console.log(`isarray=${departments}`);
-    */
-    // end debug
-
     
     let union_of_conditions = []
     /*
@@ -159,6 +166,7 @@ exports.setSchool =
 
 exports.initializePage = [
     getEmptyHeatmap,
+	getSchools,
     renderFinal
     /*
     (req, res) => {

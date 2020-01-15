@@ -1,5 +1,6 @@
-- let school_list = ['--Select University--', 'UCI', 'STANFORD'] //!{JSON.stringify(schools)}
-
+- let school_list = Array.from(schools.sort(), school => school.toUpperCase())
+- school_list = ['--Select University--'].concat(school_list);
+- console.log(`school names in server: ${school_list}`);
 
 div#university-select
     label#university-label.align-self-bottom.font-weight-bold(for='University') University:
@@ -13,8 +14,6 @@ h6.input-form-title.p-1 Select Demographic(s):
 div#demographics-div(class='d-flex')
     form(id='demographics-form' method='POST' action='')
       div#demographics-rows-group.drop-down-selectors(class='flex-col')
-      - //div#departments-group.drop-down-dept-selectors
-      - //div#divisions-group.drop-down-division-selectors
       br
 
 if errors

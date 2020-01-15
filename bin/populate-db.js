@@ -28,9 +28,9 @@ mongoose.Promise = global.Promise;
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // one-off to add stanford to the DB 
-//db.once('open', uploadUniversityObject);
+db.once('open', uploadUniversityObject);
 // hotfix: stanford courses have a trailing semi-colon
-db.once('open', hotfixFixCourseNumberStanford);
+//db.once('open', hotfixFixCourseNumberStanford);
 function hotfixFixCourseNumberStanford(){
     var fixedCourses = []
     Course.find({university: "stanford"}).cursor()
@@ -131,7 +131,7 @@ function finish(err, results) {
 scraper = StanfordScraper
 name = "stanford"
 function uploadUniversityObject(){
-    const conditions = {university:name};
+    const conditions = {university: name};
     console.log(conditions);
     Course.find(conditions, function(err, courses){
         if (err) return console.error(err);
