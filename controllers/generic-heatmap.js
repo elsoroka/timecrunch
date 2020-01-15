@@ -182,7 +182,7 @@ class GenericHeatmap {
 		const extras = days.filter( (day, _) => (day >= this.days));
 		// Add if necessary
 		if (0 != extras.length) {
-			const newDays = new Array(extras.length).fill(0);
+			const newDays = new Array(extras.length).fill(0).map(blankcell);
 			for (let row of this.heatmap) {
 				row.push(...newDays);
 			}
