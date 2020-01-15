@@ -25,7 +25,7 @@ console.log(timeIncrements);
 
 
 // GET request served the page
-if (server_data.init === "init") {
+if (server_data.init) {
     console.log(`GET request rendered page... building empty heatmap`);
     console.log(`server_data: ${server_data.heatmap}`);
     // the page rendering appears faster if the initial empty heatmap is 
@@ -39,6 +39,7 @@ if (server_data.init === "init") {
     });
     */
     buildHeatmap(server_data);
+    emptyHeatmapJson = server_data
 };
 
 

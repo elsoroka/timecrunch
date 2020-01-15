@@ -120,9 +120,8 @@ const executeQuery = (req, res, next) => {
        // let heatmap_dict = heatmap_data //view_dict(heatmap_data);
         // ELS: Not sure what this is so I temporarily added the old render call
         // res.render('timecrunch_interface_with_heatmap_data', heatmap_dict);
-
         res.locals.heatmap_object = {
-            init: "false",
+            init: false,
             weekdayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
             timeIncrements: hm.incrementLabels,
             heatmap: hm.heatmap,
