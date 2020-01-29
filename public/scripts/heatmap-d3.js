@@ -52,7 +52,7 @@ function buildHeatmap(heatmapJson) {
 
     // TODO: programmatically determine width and height 
     // set the dimensions and margins of the graph
-    const margin = {top: 90, right: 10, bottom: 100, left: 70};//$('#input-form-container').width()}
+    const margin = {top: 80, right: 10, bottom: 100, left: 70};//$('#input-form-container').width()}
     //let width = document.getElementById('schedule-container').offsetWidth - margin.left - margin.right;
     console.log(`wrapper-width= ${$('.wrapper').width()}`);
     console.log(`input-forrm-width= ${$('#input-form-container').width()}`);
@@ -73,11 +73,17 @@ function buildHeatmap(heatmapJson) {
     // append the svg object to the body of the page
     let svg = d3.select("#heatmap")
     .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("z-index", "90")
+      .attr("width", "250%")
+      .attr("height", "100vh")
+      //.attr("height", `${$(document).height()}`)
+      .attr("max-height", `100em`)
+        
+      //.attr("width", margin.left + margin.right)
+      //.attr("height", margin.top + margin.bottom)
     .append("g")
       .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+            "translate(" + margin.left + "," + (margin.top) + ")");
 
     /*
      * Title
@@ -94,6 +100,8 @@ function buildHeatmap(heatmapJson) {
 
     // Add subtitle to graph
     svg.append("text")
+        .attr("position", "fixed")
+        .attr("z-index", "90")
         .attr("x", 0)
         .attr("y", -60)
         .attr("text-anchor", "left")
@@ -129,7 +137,7 @@ function buildHeatmap(heatmapJson) {
         tooltip
           .html(d.value + " students in class " + d.classnames)
           .style("left", (d3.mouse(this)[0]+10) + "px")
-          .style("top", (d3.mouse(this)[1]) + "px")
+          .style("top", (d3.mouse(this)[1])+100 + "px")
     }
 
     let mouseleave = function(d) {
@@ -150,7 +158,7 @@ function buildHeatmap(heatmapJson) {
         .style("font-size", 22)
         .style("font-weight", 700)
         .style("font-family", "Quicksand, sans-serif")
-        .attr("transform", "translate(0," + 0 + ")")
+        //.attr("transform", "translate(0," + 0 + ")")
         .classed("x axis", true)
         //.select(".domain").remove()
 
@@ -159,7 +167,8 @@ function buildHeatmap(heatmapJson) {
         .style("font-size", 16)
         .style("font-weight", 700)
         .style("font-family", "Quicksand, sans-serif")
-        .attr("transform", "translate(0," + -24 + ")")
+        .style("position", "fixed")
+        .attr("transform", "translate(0," + -13 + ")")
         .classed("y axis", true)
 
     /*

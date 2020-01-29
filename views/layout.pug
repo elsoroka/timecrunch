@@ -35,7 +35,7 @@ html(lang='en')
             include add-demographic-button-template.handlebars
 
         div.wrapper
-            nav#input-form-sidebar
+            div#input-form-sidebar
                 div.sidebar-header
                     h4.align-text-left Demographics
                     strong D
@@ -45,7 +45,7 @@ html(lang='en')
                         include input-form 
                     div(id='extra-error-div' class='container-fluid')
                         block content
-            div#schedule-container.container-fluid
+            div#schedule-container.schedule-display
                 div.d-flex.justify-content-start
                     button#input-form-collapse-button.navbar-btn(type="button")
                         span 
@@ -74,7 +74,10 @@ html(lang='en')
         $(document).ready(function() { 
             $('body').bootstrapMaterialDesign(); 
             $('#input-form-sidebar').mCustomScrollbar({
-                theme: "minimal"
+                theme: "light-thin",
+                scrollbarPosition: "inside",
+                scrollInertia: 100
+                
             });
             $('#input-form-collapse-button').on('click', function () {
                 // open/close input-form
@@ -86,6 +89,7 @@ html(lang='en')
                 // and also adjust aria-expanded attributes we use for the open/closed arrows
                 // in our CSS
                 $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+                $('#schedule-container').toggleClass('collapsible');
             });
         });
     //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')

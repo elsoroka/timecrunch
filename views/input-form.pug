@@ -2,14 +2,15 @@
 - school_list = ['--Select University--'].concat(school_list);
 - console.log(`school names in server: ${school_list}`);
 
-div#university-select
-    label#university-label.align-self-bottom.font-weight-bold(for='University') University:
+div#university-select.d-flex.flex-column
+    label#university-label.p-1.align-self-bottom.font-weight-bold(for='University') University:
     select#school-drop-down(name='school-select' class='form-control')
       for school in school_list
         option(value=school) #{school}
 
 br
-h6.input-form-title.p-1 Select Demographic(s):
+h6.input-form-title.p-1 Select 
+h6.input-form-title.p-1 Demographic(s):
 
 div#demographics-div(class='d-flex')
     form(id='demographics-form' method='POST' action='')
