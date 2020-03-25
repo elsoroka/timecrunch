@@ -18,12 +18,30 @@ const getEmptyHeatmap = (req, res, next) => {
     next();
 };
 
+const getSchools = (req, res, next) => {
+	University.find({}, {name: 1, _id: 0}, function(err, names) {
+		console.log("university names");
+		console.log(names)
+		if (err) {
+			console.log("error finding univesity");
+			return next(err);
+		}
+
+		res.locals.schoolsInDatabase = Array.from(names, projection => projection.name);
+		console.log("array from names:")
+		console.log(res.locals.schoolsInDatabase)
+		next();
+		return;
+	});
+};
+
 // The final stage of the route process of a /timecrunch GET request, 
 // i.e. a typical scenario of a user landing on the site.
 const renderFinal = (req, res) => {
     //console.log(res.locals.heatmap_object);
-    console.log("called res.render");
-	res.render('layout', {title: 'timecrunch', server_data: res.locals.heatmap_object });
+    console.log("calling res.render");
+	console.log(res.locals.schoolsInDatabase);
+	res.render('layout', {title: 'timecrunch', server_data: res.locals.heatmap_object, schools: res.locals.schoolsInDatabase});
 };
 
 // The final stage of the route process of a POST request that wants to redraw the heatmap,
@@ -54,17 +72,6 @@ const executeQuery = (req, res, next) => {
     console.log(`executyQuery:39:req.body.selections=${req.body.selections}`)
     console.log(toType(req.body.selections));
     console.log(req.body.selections);
-
-
-    /*
-    let departments = req.body.departments.split(',');//JSON.parse('[' + req.body.departments + ']');
-    let divisions = req.body.divisions.split(',');
-    console.log(departments);
-    if (Array.isArray(req.body.departments)) console.log(`isarray`);
-    if (Array.isArray(departments)) console.log(`isarray=${departments}`);
-    */
-    // end debug
-
     
     let union_of_conditions = []
     /*
@@ -92,13 +99,10 @@ const executeQuery = (req, res, next) => {
         }
     });
 
-    // The latter would look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
-    //let for_university = { university: req.body.university }; 
-    union_of_conditions[0].university = req.body.university.toLowerCase();
-
-    console.log(`conditions=${JSON.stringify(union_of_conditions)}`);
+    // look like conditions = [{division: 'lower', department: 'Math'}, {division: 'upper', department: 'CS'}] 
+    let for_university = { university: req.body.university.toLowerCase() }; 
     // Build the query to get all courses 
-    let course_query = Course.find().or(union_of_conditions);//.orFail();//new Error("No courses found")); 
+    let course_query = Course.find(for_university).or(union_of_conditions);//.orFail();//new Error("No courses found")); 
     // Run the query, exec returns a Promise
     course_query.exec( function(err, courses) {
         if (err) return next(err); // TODO: catch and handle error: "No courses found" 
@@ -116,9 +120,8 @@ const executeQuery = (req, res, next) => {
        // let heatmap_dict = heatmap_data //view_dict(heatmap_data);
         // ELS: Not sure what this is so I temporarily added the old render call
         // res.render('timecrunch_interface_with_heatmap_data', heatmap_dict);
-
         res.locals.heatmap_object = {
-            init: "false",
+            init: false,
             weekdayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
             timeIncrements: hm.incrementLabels,
             heatmap: hm.heatmap,
@@ -163,6 +166,7 @@ exports.setSchool =
 
 exports.initializePage = [
     getEmptyHeatmap,
+	getSchools,
     renderFinal
     /*
     (req, res) => {

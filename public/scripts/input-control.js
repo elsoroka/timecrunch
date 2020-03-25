@@ -7,24 +7,22 @@ $( function() {
      * so parts of this may look patchy and messy
      * */
     
-
-
     // Globals
-    let finishedArr = [];
-    let departmentDropdownCount = 0;
-    let departmentDropdownId = 0;
-    let divisionDropdownId = 0;  
-    let currentRow = 0;
-    let departmentList = ['Any Department'];
-    let divisionList = ['Any Course Level'];
-    let selectedUniversityName = undefined;
-    let demographicRowId = 0;
+    let demRowCount = 0;
+    let demographicDropdownId = 0
+        departmentDropdownId = 0,
+        divisionDropdownId = 0;  
+    let departmentListPlaceholder   = "Any Department",
+        divisionListPlaceholder      = "Any Course Level";
 
+    let departmentList  =   [departmentListPlaceholder];
+    let divisionList    =   [divisionListPlaceholder];
+    let selectedUniversityName = undefined;
+
+    console.log(`hello from jquery`);
 
     const demographicDropdown = Handlebars.compile($("#demographic-dropdowns-template").html());
-
     const demogButtons = Handlebars.compile($('#add-demographic-button-template').html());
-
 
     /*
      * Programmatically create a demographic selection drop down box
@@ -48,6 +46,7 @@ $( function() {
             division = demographic.division;
 
         thisParent.html(dropdownTemplate({
+            demographicId: demographic.containerId,
             departmentId: department.containerId,
             divisionId: division.containerId
         }));
@@ -57,30 +56,42 @@ $( function() {
     }
 
     // replace Add <Demographic> with corresponding Selection dropdown  box
-    $('#demographics-rows-group').on('click', 'button', function() {
+    $('#demographics-rows-group').on('click', '.add-demog-btn', function() {
         if($(this).hasClass('add-demog-btn')) {
+            ++demRowCount;
             replaceWithSelectionDropdowns(
                 $(this).parent(), 
                 demographicDropdown,
                 { 
+                    containerId: demographicDropdownId,
                     department: { 
-                        containerId: `department-dropdown-${departmentDropdownId}`, 
+                        containerId: `department-dropdown-${demographicDropdownId}`, 
                         demList: departmentList 
                     },
                     division: { 
-                        containerId: `division-dropdown-${divisionDropdownId}`, 
+                        containerId: `division-dropdown-${demographicDropdownId}`, 
                         demList: divisionList 
                     }
                 }
             );
-
-            ++departmentDropdownId;
-            ++divisionDropdownId;
-            ++departmentDropdownCount;
+            ++demographicDropdownId;
         }
 
         // add next row of buttons 
         $('#demographics-rows-group').append(demogButtons());
+    });
+
+    // remove dropdown  boxes
+    $('#demographics-rows-group').on('click', '.remove-demog-btn', function() {
+        console.log('removing demogs');
+        if($(this).hasClass('remove-demog-btn')) {
+            --demRowCount;
+            console.log('checking parent');
+            console.log($(this).parent())
+            $(this).parent().parent().parent().parent().remove()
+        }
+        $('#demographics-rows-group').trigger('change');
+
     });
 
 
@@ -145,11 +156,11 @@ $( function() {
 			console.log(`isdropdownopne = ${isDropdownOpen}`);
         }
 	});
+
     $("#school-drop-down").change( function() {
 		let loadSortedDemographicsList = (dl, rl) => {
 			let placeholder = [dl[0]];
-			dl = Array.from(new Set([...rl])); // original demographicsList, newly populated results list 
-			dl.sort();
+			dl = Array.from(new Set([...rl])).filter(Boolean).sort(); // remove duplicates and empty values
 			return Array.from(placeholder.concat(dl));
 		};
         console.log(`hello from school select event listener`);
@@ -159,19 +170,20 @@ $( function() {
         if ($(this).prop("selectedIndex") > 0) {
             // user selected school 
             let tempSchoolSelection = $(this).val();
-
+            console.log(`selected school: ${$(this).val()}`);
             if (selectedUniversityName === undefined || selectedUniversityName !== tempSchoolSelection) {
                 // new school choice
                 selectedUniversityName = tempSchoolSelection; // remember this school choice
+                $('#demographics-rows-group').children().remove(); // remove any previous demographics html elements
+                divisionList = [divisionListPlaceholder];
+                departmentList = [departmentListPlaceholder];
+
                 $.get("/timecrunch/setSchool", {university_name: selectedUniversityName}, function(res) {
-                    let deptsNameLabel = "dept_names", divsNameLabel = "division_names";
                     let demographics = [];//new Array(2)
 
-					
                     // load demographics from server
 					departmentList = loadSortedDemographicsList(departmentList, res.departments);
 					divisionList = Array.from(new Set([...divisionList, ...res.divisions]));
-					
 
                     // add first row of buttons -- when school choice is selected
                     $('#demographics-rows-group').append(demogButtons());
@@ -179,8 +191,7 @@ $( function() {
 
                 });
 				// show demographics prompt:
-				$('.input-form-title').toggleClass("school-is-selected");
-
+				$('.input-form-title').addClass("school-is-selected");
             }
         }
         $("#school-drop-down").blur();
@@ -207,9 +218,7 @@ $( function() {
         return selectedUniversityName;
     }
 
-    // warning: not using this right now using the more general version below 
-    // but TODO: allow for things like lower MATH + upper ARABIC  etc.
-    function getSelectedDemographic(thisRow, selectorStr, placeholder = "Any ") {
+    function getSelectedDemographic(thisRow, selectorStr, placeholder = "--") {
         let demRow = [] 
         $.each(thisRow.find(selectorStr), function(_, option) {
             if (!option.text.startsWith(placeholder))
@@ -230,17 +239,18 @@ $( function() {
         return demRow;
     }
 
-    function getDemographicRows(selectorStr, placeholder) {
-        let demographicRequest = [] //new Set();
-        // [ { [], [] },  ]
-        //
-        console.log(`dm`);
+    function getDemographicQueries(selectorStr, placeholder) {
+        let demographicRequest = [] //new Set(); // [ { [], [] },  ]
+        console.log(`demographic rows via selectorstr=${selectorStr}`);
         $.each($(".demographic-row"), function(){
-            let depts = getSelectedDemographic($(this), ".department-selection option:selected");
-            let divis = getSelectedDemographic($(this), ".division-selection option:selected");
+            let depts = getSelectedDemographic($(this), ".department-selection option:selected", departmentListPlaceholder);
+            let divis = getSelectedDemographic($(this), ".division-selection option:selected", divisionListPlaceholder);
             let query = {departments: depts, divisions: divis}
             console.log(`query=${query.departments}|${query.divisions}`);
-            demographicRequest.push(query);
+            // at least one must be selected to be considered valid query
+            // i.e. disallow search for all classes via the dropdowns
+            if (depts.length != 0 || divis.length != 0)
+                demographicRequest.push(query);
         });
         return demographicRequest;
     }
@@ -249,7 +259,7 @@ $( function() {
         //let demographics = new FormData();
         let demographics = {};//university: 
         demographics.university =  getSelectedUniversity();
-        demographics.selections = getDemographicRows();
+        demographics.selections = getDemographicQueries();
         console.log(demographics.university);
         console.log(demographics.selections[0]);
         // TODO: add divisions
@@ -273,31 +283,45 @@ $( function() {
         */
     }
 
-
-
     $('#demographics-rows-group').change(function(evt) {
+        let isNonEmpty = al => al.length != 0;
+        let rebuildHeatmap = hm => {
+            $("#heatmap").empty();
+            buildHeatmap(hm);
+        };
+        let isNonEmptySelection = sel => isNonEmpty(sel) && 
+            (isNonEmpty(sel.departments) || isNonEmpty(sel.divisions));
+
         console.log(`hello from demographics rows event listener`);
         evt.preventDefault();
         let postUrl = '/timecrunch';//$(this).attr("action"); 
         let requestMethod = "POST";//$(this).attr("method");
-        let demographicJson = JSON.stringify(getDemographics());
-        //console.log(formData.toString());
-        //for (let p of formData) console.log(p);
-        $.ajax({
-            url: postUrl,
-            type:  requestMethod,
-            data: demographicJson,
-            contentType: "application/json",
-            //dataType
-            //cache: false,
-            //processData: false,
-        }).done(response => {
-            let heatmapDiv = $("#heatmap");
-            heatmapDiv.empty();
-            //heatmapDiv.html("<p>hello world</p>");
-            buildHeatmap(response);
-            console.log(response);
-        });
+        let demographicJson = getDemographics();
+        console.log(demographicJson);
+        console.log(demographicJson.selections.length);
+        if (isNonEmpty(demographicJson.selections)) {
+            // then ask server for heatmap 
+            console.log('using ajax');
+            //console.log(formData.toString());
+            //for (let p of formData) console.log(p);
+            $.ajax({
+                url: postUrl,
+                type:  requestMethod,
+                data: JSON.stringify(demographicJson),
+                contentType: "application/json",
+                //dataType
+                //cache: false,
+                //processData: false,
+            }).done(heatmapJson => {
+                rebuildHeatmap(heatmapJson);
+                console.log(heatmapJson);
+            });
+        }
+        else { //empty selections? use emptyHeatmap
+            console.log(`empty selections? use emptyHeatmap`);
+            rebuildHeatmap(emptyHeatmapJson);
+            console.log(emptyHeatmapJson);
+        }
     });
 
     $("#departments-form").change( function() {

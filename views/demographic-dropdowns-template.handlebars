@@ -1,6 +1,6 @@
 <!-- This looks like an HTML file but HandlebarsJS requires this HTML-like syntax -->
 <!-- This will be rendered by the browser via handlebars -->
-<div class="demographic-row">
+<div class="demographic-row", id={{demographicId}}>
     <div id={{departmentId}}>
         <div class='d-flex p-1'>
             <div class='text-center'>
@@ -22,6 +22,14 @@
                 <select class='demographic-selection division-selection form-control align-self-center'>
                 </select>
             </div>
+        </div>
+    </div>
+
+    <div class='col ml-auto'>
+        <div class='ml-auto'>
+            <button type="button" class="btn btn-fab-minus-xs remove-demog-btn">
+                <i class="fas fa-minus fab-remove"></i>
+            </button>
         </div>
     </div>
 </div>

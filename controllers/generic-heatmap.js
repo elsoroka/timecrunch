@@ -82,26 +82,41 @@ class GenericHeatmap {
 
                     if (meeting.timeIsTBA) 
                         return; // in a .forEach, this works like continue, i.e. goes to next element
+                    if (meeting.startTime > meeting.endTime)
+                        return
+
                     const rows = this.getRows(meeting.startTime, meeting.endTime);
-                    const cols = this.getCols(meeting.days);
+					const cols = this.getCols(meeting.days);
                     //console.log("Rows", rows, "Cols", cols);
                     rows.forEach(row => { 
                         //console.log("row", row);
-                        cols.forEach( col => {
-                            //console.log("col", col);
-                            // HACK! HACK! HACK! TODO: FIX THIS HACK!
-                            // Some of the data has the course.courseNumber like "EE 364A"
-                            // e.g. the dept + courseNumber
-                            // and some doesn't
-                            // construct a "name" which has the dept + number
-                            // ~emi
-                            let classname = course.courseNumber;
-                            if (!classname.startsWith(course.department)) {
-                            	classname = course.department + classname;
+                        cols.forEach(col => {
+                            try {
+                                // console.log("col", col);
+                                // HACK! HACK! HACK! TODO: FIX THIS HACK!
+                                // Some of the data has the course.courseNumber like "EE 364A"
+                                // e.g. the dept + courseNumber
+                                // and some doesn't
+                                // construct a "name" which has the dept + number
+                                // ~emi
+                                let classname = course.courseNumber;
+                                if (!classname.startsWith(course.department)) 
+                                    classname = course.department + classname;
+                                //console.log(this.heatmap[row][col], row, col)
+                                this.heatmap[row][col].count += section.enrolled;
+                                // if empty "class" else ",class"
+                                let classStr = this.heatmap[row][col].classnames == ""  
+                                    ?  `${classname}`  
+                                    : `, ${classname}`;
+                                this.heatmap[row][col].classnames += classStr; 
+
+                            } catch(error) {
+
+                                console.log(meeting);
+                                console.log(error);
+                                console.log(`r,c=${row},${col}`);
                             }
-                            this.heatmap[row][col].count += section.enrolled;
-                            this.heatmap[row][col].classnames += classname + ", ";
-                        }); //end for cols
+                        }); //end for col
                     }); // end for rows
 
                 }); //end for meetings
@@ -110,7 +125,7 @@ class GenericHeatmap {
 	}
 
 	getRows(startMinutes, endMinutes) {
-        //let dbg = this.dbg(this.getRows_id);
+        let dbg = this.dbg(this.getRows_id);
         //dbg({startMinutes});
         //dbg({endMinutes});
 	    // If startMinutes is EARLIER than the first row, prepend row(s) to display it.
@@ -148,14 +163,19 @@ class GenericHeatmap {
 	    if (length < 0) {
 	    	length = 0;
 	    }
-        //dbg({end});
-        //dbg({start});
-        //dbg({length});
-	    
-	    const rows = new Array(length).fill().map((_, i) => i+start );
+        try{
+            const rows = Array(length).fill().map((_, i) => i+start );
+            return rows;
+        }
+        catch(error)
+        {
+            console.log(error);
+            dbg({end});
+            dbg({start});
+            dbg({length});
+            console.log("Rows:", rows);
+        }
 	    //console.log("For start and end:", startMinutes, endMinutes);
-	    //console.log("Rows:", rows);
-	    return rows;
 	}
 
 	getCols(days) {
@@ -164,7 +184,7 @@ class GenericHeatmap {
 		const extras = days.filter( (day, _) => (day >= this.days));
 		// Add if necessary
 		if (0 != extras.length) {
-			const newDays = new Array(extras.length).fill(0);
+			const newDays = new Array(extras.length).fill(0).map(blankcell);
 			for (let row of this.heatmap) {
 				row.push(...newDays);
 			}
@@ -214,7 +234,7 @@ class GenericHeatmap {
         let empty_heatmap = [...Array(max_time)].map(() => Array(5).fill(0).map(blankcell));
         // Create an array of just counts for doing color data
         let heatmap_data = {
-            init: "init",
+            init: true,
             weekdayNames: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
             timeIncrements: incrementLabels,
             heatmap: empty_heatmap,

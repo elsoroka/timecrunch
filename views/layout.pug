@@ -5,6 +5,9 @@ html(lang='en')
         meta(charset='utf-8')
         meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
 
+        // Google Fonts
+        // Quicksand sans-serif,Changa sans-serif, Yatra One cursive 
+        link(href='https://fonts.googleapis.com/css?family=Quicksand:400,700&display=swap' rel='stylesheet')
         // Material Design for Bootstrap fonts and icons
         link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons')
         // Custom Material Design Select
@@ -32,7 +35,7 @@ html(lang='en')
             include add-demographic-button-template.handlebars
 
         div.wrapper
-            nav#input-form-sidebar
+            div#input-form-sidebar
                 div.sidebar-header
                     h4.align-text-left Demographics
                     strong D
@@ -42,7 +45,7 @@ html(lang='en')
                         include input-form 
                     div(id='extra-error-div' class='container-fluid')
                         block content
-            div#schedule-container.container-fluid
+            div#schedule-container.schedule-display
                 div.d-flex.justify-content-start
                     button#input-form-collapse-button.navbar-btn(type="button")
                         span 
@@ -64,13 +67,17 @@ html(lang='en')
     script
         .
             let server_data = !{JSON.stringify(server_data)};
+            let emptyHeatmapJson
         include ../public/scripts/heatmap-d3.js
         include ../public/scripts/input-control.js
     script.
         $(document).ready(function() { 
             $('body').bootstrapMaterialDesign(); 
             $('#input-form-sidebar').mCustomScrollbar({
-                theme: "minimal"
+                theme: "light-thin",
+                scrollbarPosition: "inside",
+                scrollInertia: 100
+                
             });
             $('#input-form-collapse-button').on('click', function () {
                 // open/close input-form
@@ -82,6 +89,7 @@ html(lang='en')
                 // and also adjust aria-expanded attributes we use for the open/closed arrows
                 // in our CSS
                 $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+                $('#schedule-container').toggleClass('collapsible');
             });
         });
     //script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
