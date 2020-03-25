@@ -8,7 +8,7 @@ const path = require("path");
 var _ = "";
 
 // testing code, please remove
-//run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
+// run({term:"2020 Winter", "department":"AA", "division":"Graduate"});
 //console.log("\n\n");
 //run({term:"2020 Summer", "department":"EE", "division":"Graduate"});
 
@@ -84,7 +84,6 @@ async function run(options) {
 			await wait(1000);
 		}
     }
-    // console.log("Returning", courses.length, "courses");
     return courses;
 }
 
@@ -373,7 +372,9 @@ function parseTime(timeString) {
 	// The first group is the hours, the second is minutes, the third is A or P
 	const result = timeString.match(/(\d{1,2}):(\d{2})\s?(A|P)M/);
 	if ((null != result) && (4 == result.length)) {
-		return parseInt(result[1])*60 + parseInt(result[2]) + (("P" === result[3]) ? 12*60 : 0);
+		const hour = parseInt(result[1]);
+		const minute = parseInt(result[2]);
+		return hour*60 + minute + (((hour < 12) && ("P" === result[3])) ? 12*60 : 0);
 	}
 	else {
 		return null; // Failed to find it

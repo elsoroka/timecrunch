@@ -136,6 +136,7 @@ function uploadUniversityObject(){
     Course.find(conditions, function(err, courses){
         if (err) return console.error(err);
         console.log("RECEIVED", courses.length, "results");
+
         courseIds = []
         courses.forEach(course => courseIds.push(course._id));
         let university = new University({

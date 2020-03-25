@@ -75,7 +75,6 @@ class GenericHeatmap {
 
 	fill(courses) {
         //let dbg = this.dbg(this.getFill_id);
-        console.log("\n\nFirst", this.heatmap[0][0], "\n\n");
         courses.forEach(course => { 
         //    dbg({course});
             course.sections.forEach(section => {
@@ -160,7 +159,10 @@ class GenericHeatmap {
         
 	    const start  = Math.floor((startMinutes-this.timeStart)/this.timeStep);
 	    const end    = Math.ceil((endMinutes-this.timeStart)/this.timeStep);
-	    const length = end-start;
+	    let length = end-start;
+	    if (length < 0) {
+	    	length = 0;
+	    }
         try{
             const rows = Array(length).fill().map((_, i) => i+start );
             return rows;

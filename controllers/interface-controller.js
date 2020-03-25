@@ -154,6 +154,7 @@ exports.setSchool =
                     console.log("error finding univesity");
                     return next(err);
                 }
+                console.log(university);
                 console.log(university.departments);
                 console.log(university.divisions);
                 res.json({departments: university.departments, divisions: university.divisions});
