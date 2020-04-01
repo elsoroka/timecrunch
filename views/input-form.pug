@@ -1,4 +1,5 @@
-- let school_list = Array.from(schools.sort(), school => school.toUpperCase())
+- let school_list = []
+- if (schools) school_list = Array.from(schools.sort(), school => school.toUpperCase())
 - school_list = ['--Select University--'].concat(school_list);
 - console.log(`school names in server: ${school_list}`);
 
