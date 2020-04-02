@@ -4,7 +4,7 @@ const UciScraper = require("./uci-scraper.js")
 const StanfordScraper = require('./stanford-scraper.js')
 
 var finalJson = {};
-runScraper(StanfordScraper);
+runScraper(UciScraper);
 
 // OK so I decoupled UciScraper from runScraper and it works
 // But I don't know how to handle "any" scraper which implements the interface.
