@@ -18,17 +18,23 @@ function name() {
 }
 
 function currentTerm() {
-	return "2020 Winter";
+	return "2020 Spring";
 }
 
 function process(courses, options) {
     // Add the course level because we don't know it from the result
     // we just have it from options
     const level = options["division"];
+    let new_courses = []
     courses.forEach( course => {
             course = parseSections(course.sections);
+            // Why, exactly, course = something does not update the courses list
+            // is beyond me. ~emi
+            new_courses.push(course)
         });
-    return courses; // fix
+    //console.log("in process, courses:")
+    //console.log(JSON.stringify(new_courses))
+    return new_courses; // fix
 }
 
 async function run(options) {
