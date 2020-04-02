@@ -35,7 +35,7 @@ mongoose.set('useUnifiedTopology', true);
 // Tell Mongoose to use global promise library
 mongoose.Promise = global.Promise 
 // Connect mongoose to mongoDB cloud atlas server
-var mongoDB = 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/test?retryWrites=true&w=majority';
+var mongoDB = 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/current-term?retryWrites=true&w=majority';
 
 mongoose.connect(mongoDB)
 // Get handle to default connection

@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Course = require('../models/course')
 const University = require('../models/university')
 const StanfordScraper = require('./scrapers/stanford-scraper.js')
+const UciScraper = require('./scrapers/uci-scraper.js')
 
 const userArgs = process.argv.slice(2);
 console.log('Read ./bin/university_data/<schoolname>.json to update database with course data. Specified database as argument - e.g.: populatedb mongodb+srv://cooluser:coolpassword@cluster0-mbdj7.mongodb.net/local_library?retryWrites=true');
@@ -56,6 +57,11 @@ function hotfixFixCourseNumberStanford(){
         });
 };
 
+// Delay used to slow down between page requests.
+function wait(ms, value) {
+    return new Promise(resolve => setTimeout(resolve, ms, value));
+}
+
 function courseCreate(uni, div, dept, number, title, sections, cb) {
     let courseinfo = {
         university: uni, 
@@ -64,7 +70,6 @@ function courseCreate(uni, div, dept, number, title, sections, cb) {
         courseNumber: number,
         courseTitle: title, 
     };
-
     // upsert is true which means it will find the course and update it or create a new course if not present
     // option "new" set to true means it will return the updated version instead of the original
     Course.findOneAndUpdate(courseinfo, {sections: sections}, {new: true, upsert: true}, 
@@ -101,7 +106,8 @@ async function load_courses_all_universities(path, cb) {
                         //console.log(dept)
                         for (course_index in uni_json[div][dept]){
                             cls = uni_json[div][dept][course_index]
-                            //console.log(cls)
+                            console.log("\n\n")
+                            console.log(JSON.stringify(cls))
                             courseNumber = cls.courseNumber
                             courseTitle = cls.courseTitle
                             //console.log(courseTitle, courseNumber);
@@ -124,12 +130,13 @@ function finish(err, results) {
     else {
         console.log('CourseInstances: '+ results);
     }
-    db.close();
+    // TODO: Figure out where to put this so it doesn't cause a concurrency error.
+    //db.close();
  }
 
 
-scraper = StanfordScraper
-name = "stanford"
+scraper = UciScraper
+name = "uci"
 function uploadUniversityObject(){
     const conditions = {university: name};
     console.log(conditions);
@@ -154,8 +161,8 @@ function uploadUniversityObject(){
     })
 }
 
-//let path_to_university_json = './bin/university-data';
-//readUniversityData(path_to_university_json, finish);
+let path_to_university_json = './bin/university-data/UC Irvine';
+readUniversityData(path_to_university_json, finish);
 //uploadUniversityObject(StanfordScraper, 'stanford'), finish);
 
 
