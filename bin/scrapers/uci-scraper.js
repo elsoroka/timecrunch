@@ -3,6 +3,8 @@
 const WebSocApi = require('websoc-api');
 const fs = require("fs");
 const path = require("path");
+//const fs = import("fs");
+//const path = import("path");
 
 function departments() {
 	let uciDepts = fs.readFileSync(path.resolve(__dirname, "uci-depts.txt"), "utf-8").split('\n');
@@ -18,7 +20,7 @@ function name() {
 }
 
 function currentTerm() {
-	return "2020 Spring";
+	return "2023 Winter";
 }
 
 function process(courses, options) {

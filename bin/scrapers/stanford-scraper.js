@@ -1,10 +1,11 @@
 // HTML web scraper for explorecourses.stanford.edu
 'use strict'; // ban god damn global variables
 
-const axios = require('axios');
-const cheerio = require('cheerio');
+//const axios = require('axios');
+//const cheerio = require('cheerio');
 const fs = require("fs");
 const path = require("path");
+
 var _ = "";
 
 // testing code, please remove
@@ -31,10 +32,13 @@ function name() {
 
 // TODO: FIX THIS
 function currentTerm() {
-	return "2020 Winter";
+	return "2023 Winter"
 }
 
 async function run(options) {
+        const {default:axios} = await import("axios");
+//	const {default:cheerio} = await import("cheerio");
+//	const cheerio = await import("cheerio");
 	/*options = {
                     term: term,
                     department: deptName,

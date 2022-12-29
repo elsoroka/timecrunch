@@ -18,7 +18,7 @@ if (userArgs.length > 0 && !userArgs[0].startsWith('mongodb')) {
     console.log('ERROR: You need to specify a valid mongodb URL as the first argument');
     return -1;
 }
-let mongoDB = userArgs.length > 1 ? userArgs[0] : 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/test?retryWrites=true&w=majority';
+let mongoDB = userArgs.length > 1 ? userArgs[0] : 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/current-term?retryWrites=true&w=majority';
 // set these to stop deprecation warnings
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
@@ -29,9 +29,8 @@ mongoose.Promise = global.Promise;
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // one-off to add stanford to the DB 
-db.once('open', uploadUniversityObject);
-// hotfix: stanford courses have a trailing semi-colon
-//db.once('open', hotfixFixCourseNumberStanford);
+//db.once('open', uploadUniversityObject);
+
 function hotfixFixCourseNumberStanford(){
     var fixedCourses = []
     Course.find({university: "stanford"}).cursor()
@@ -135,8 +134,9 @@ function finish(err, results) {
  }
 
 
-scraper = UciScraper
-name = "uci"
+//scraper = StanfordScraper
+//name = "stanford"
+
 function uploadUniversityObject(){
     const conditions = {university: name};
     console.log(conditions);
@@ -161,8 +161,14 @@ function uploadUniversityObject(){
     })
 }
 
-let path_to_university_json = './bin/university-data/UC Irvine';
+
+let path_to_university_json = './bin/university-data/';
+// Uploads new Courses from json files found in path_to_university_json
+// assuming the filename.json is the university name.
 readUniversityData(path_to_university_json, finish);
-//uploadUniversityObject(StanfordScraper, 'stanford'), finish);
+// hotfix: stanford courses have a trailing semi-colon
+db.once('open', hotfixFixCourseNumberStanford);
+// Creates a new University object
+//uploadUniversityObject(StanfordScraper, 'stanford', finish);
 
 
