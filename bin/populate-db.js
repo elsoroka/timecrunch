@@ -18,7 +18,8 @@ if (userArgs.length > 0 && !userArgs[0].startsWith('mongodb')) {
     console.log('ERROR: You need to specify a valid mongodb URL as the first argument');
     return -1;
 }
-let mongoDB = userArgs.length > 1 ? userArgs[0] : 'mongodb+srv://timecrunchDb:timecr0mchl0l!@timecrunch-zc0o8.azure.mongodb.net/current-term?retryWrites=true&w=majority';
+// Database uri should not be committed, it is insecure.
+let mongoDB = userArgs.length > 1 ? userArgs[0] :'DATABASE_URI_HERE';
 // set these to stop deprecation warnings
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
